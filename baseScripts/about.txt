@@ -1,0 +1,6 @@
+inital srcripts used to make the application
+
+encrypt uses AES symetric encryption to encrypt files, specifically credentials stored in .json format.
+ -check the .json file in this folder for an example
+
+ the other one does the actual health check
