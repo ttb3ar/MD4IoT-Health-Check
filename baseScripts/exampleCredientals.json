@@ -1,0 +1,14 @@
+{
+  "192.168.9.4": {
+    "username": "user",
+    "password": "Pass",
+    "username2": "user2",
+    "password2": "Pass2"
+  },
+  "192.168.9.164": {
+    "username": "user",
+    "password": "Pass",
+    "username2": "user",
+    "password2": "Pass2"
+  }
+}
