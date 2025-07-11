@@ -12,7 +12,7 @@ Make sure the application is in the same directory as the .enc file(encrypted cr
 cd to the directory you have the application saved and:
 python MSP.py
 
-*Alternativley:*
+*Alternativley:*  
 Would just upload the .exe but github has a 25mb upload limit:  
 to turn the .py into an exe you'll want to run:  
   pip install pyinstaller  
