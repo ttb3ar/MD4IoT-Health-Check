@@ -1,17 +1,14 @@
 {
     "en": {
-        # Application
         "app_title": "Sensor Management Tool",
         "language_select": "Select Language",
         "language_english": "English",
         "language_japanese": "日本語 (Japanese)",
         
-        # Tabs
         "tab_encrypt": "Encryption",
         "tab_health": "Health Check",
         "tab_results": "Results",
         
-        # Encryption tab
         "encrypt_title": "Encrypt Credentials File",
         "source_file_label": "Source Credentials File:",
         "browse_button": "Browse",
@@ -21,7 +18,6 @@
         "file_encrypted": "File encrypted successfully!",
         "encryption_key_warning": "IMPORTANT: Save this key securely! You will need it to decrypt the credentials.",
         
-        # Health check tab
         "health_title": "Sensor Health Check",
         "creds_file_label": "Encrypted Credentials File:",
         "decrypt_key_label": "Decryption Key:",
@@ -31,7 +27,6 @@
         "clear_results_button": "Clear Results",
         "log_title": "Activity Log",
         
-        # Results tab
         "results_title": "Health Check Results",
         "sensor_name": "Sensor Name",
         "ip_address": "IP Address",
@@ -40,7 +35,6 @@
         "system_sanity": "System Sanity",
         "uptime_result": "Uptime Result",
         
-        # Status messages
         "status_ok": "OK",
         "status_fail": "FAIL",
         "status_pass": "PASS",
@@ -48,7 +42,6 @@
         "status_error": "ERROR",
         "status_pending": "PENDING",
         
-        # Dialog messages
         "health_check_complete": "Health check completed!",
         "no_file_selected": "No file selected",
         "invalid_key": "Invalid decryption key",
@@ -64,18 +57,15 @@
         "health_check_error": "Health check error: {0}",
         "failed_to_load_credentials": "Failed to load credentials: {0}",
         
-        # File dialog titles
         "select_source_file": "Select Source Credentials File",
         "select_encrypted_file": "Select Encrypted Credentials File",
         "save_results_csv": "Save Results as CSV",
         
-        # File types
         "json_files": "JSON files",
         "encrypted_files": "Encrypted files",
         "csv_files": "CSV files",
         "all_files": "All files",
         
-        # Log messages
         "loaded_credentials": "Loaded credentials for {0} sensors",
         "checking_sensor": "Checking sensor: {0} ({1})",
         "sensor_reachable": "[OK] Sensor {0} is reachable via ping",
@@ -89,18 +79,15 @@
         "no_uptime_output": "[WARN] {0} - No uptime output",
         "uptime_ssh_failed": "[ERROR] {0} - Uptime SSH failed: {1}",
         
-        # Error dialog titles
         "error_title": "Error",
         "success_title": "Success",
         "warning_title": "Warning",
         "info_title": "Information",
         
-        # Progress and status
         "progress_checking": "Checking sensors...",
         "progress_complete": "Check complete",
         "timestamp_format": "[%Y-%m-%d %H:%M:%S]",
         
-        # System messages
         "system_is_up": "System is UP!",
         "connection_timeout": "Connection timeout",
         "authentication_failed": "Authentication failed",
