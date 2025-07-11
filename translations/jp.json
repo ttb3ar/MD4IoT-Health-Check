@@ -1,17 +1,14 @@
 {
     "ja": {
-        # Application
         "app_title": "センサー管理ツール",
         "language_select": "言語選択",
         "language_english": "English",
         "language_japanese": "日本語 (Japanese)",
           
-        # Tabs
         "tab_encrypt": "暗号化",
         "tab_health": "ヘルスチェック",
         "tab_results": "結果",
         
-        # Encryption tab
         "encrypt_title": "認証情報ファイルの暗号化",
         "source_file_label": "ソース認証情報ファイル:",
         "browse_button": "参照",
@@ -21,7 +18,6 @@
         "file_encrypted": "ファイルが正常に暗号化されました！",
         "encryption_key_warning": "重要：このキーを安全に保存してください！認証情報を復号化するために必要です。",
           
-        # Health check tab
         "health_title": "センサーヘルスチェック",
         "creds_file_label": "暗号化認証情報ファイル:",
         "decrypt_key_label": "復号化キー:",
@@ -30,8 +26,7 @@
         "export_csv_button": "結果をCSVにエクスポート",
         "clear_results_button": "結果をクリア",
         "log_title": "活動ログ",
-          
-        # Results tab
+        
         "results_title": "ヘルスチェック結果",
         "sensor_name": "センサー名",
         "ip_address": "IPアドレス",
@@ -40,7 +35,6 @@
         "system_sanity": "システムサニティ",
         "uptime_result": "アップタイム結果",
           
-        # Status messages
         "status_ok": "OK",
         "status_fail": "失敗",
         "status_pass": "合格",
@@ -48,7 +42,6 @@
         "status_error": "エラー",
         "status_pending": "保留中",
          
-        # Dialog messages
         "health_check_complete": "ヘルスチェックが完了しました！",
         "no_file_selected": "ファイルが選択されていません",
         "invalid_key": "無効な復号化キー",
@@ -64,18 +57,15 @@
         "health_check_error": "ヘルスチェックエラー: {0}",
         "failed_to_load_credentials": "認証情報の読み込みに失敗しました: {0}",
          
-        # File dialog titles
         "select_source_file": "ソース認証情報ファイルを選択",
         "select_encrypted_file": "暗号化認証情報ファイルを選択",
         "save_results_csv": "結果をCSVとして保存",
         
-        # File types
         "json_files": "JSONファイル",
         "encrypted_files": "暗号化ファイル",
         "csv_files": "CSVファイル",
         "all_files": "すべてのファイル",
         
-        # Log messages
         "loaded_credentials": "{0}個のセンサーの認証情報を読み込みました",
         "checking_sensor": "センサーをチェック中: {0} ({1})",
         "sensor_reachable": "[OK] センサー {0} はpingで到達可能です",
@@ -89,18 +79,15 @@
         "no_uptime_output": "[警告] {0} - アップタイム出力なし",
         "uptime_ssh_failed": "[エラー] {0} - アップタイムSSH失敗: {1}",
         
-        # Error dialog titles
         "error_title": "エラー",
         "success_title": "成功",
         "warning_title": "警告",
         "info_title": "情報",
          
-        # Progress and status
         "progress_checking": "センサーをチェック中...",
         "progress_complete": "チェック完了",
         "timestamp_format": "[%Y-%m-%d %H:%M:%S]",
         
-        # System messages
         "system_is_up": "システムは稼働中です！",
         "connection_timeout": "接続タイムアウト",
         "authentication_failed": "認証に失敗しました",
