@@ -6,7 +6,7 @@ The best practice would then be to encrypt it and store the resulting key in a s
 (probably best to delete the original .json too)    
 
 ## Setup
-Make sure the application is in the same directory as the transaltions FOLDER (not files)
+Make sure the application is in the same directory as the .enc file(encrypted cridentials) and transaltions FOLDER (not files)
 
 ## To run  
 cd to the directory you have the application saved and:
