@@ -478,7 +478,7 @@ class SensorGUI:
             success, output, error = self.run_ssh_command(ip, user1, pass1, "system sanity")
             if success:
                 result["ssh_connectivity"] = get_message("status_ok")
-                if output and get_message("system_is_up") in output:
+                if output and "system is up" in output.lower():
                     result["system_sanity"] = get_message("status_pass")
                     self.log_message(get_message("system_sanity_passed", ip))
                 else:
