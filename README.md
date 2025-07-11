@@ -24,6 +24,6 @@ then do:
 
 
 ## To do:
-make it faster on boot
+make it faster on boot  
 rework language logic so anyone can add their own languages  
 make an installer so everyone just just click the .exe and life is good an easy
