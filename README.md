@@ -1,10 +1,9 @@
 # MD4IoT-Health-Check  
-Scripts to check the system health of MD4Iot Sensors via ping and ssh conectivity and subsequent commands  
+An application to remotley check the uptime of Microsoft Defender for IoT sensors via ping and running ssh commands.   
   
 Credentials should be stored in a .json format such as in the example file in this repo  
 The best practice would then be to encrypt it and store the resulting key in a safe place  
-  
-MSP.py is a compliation of all scripts into a full fledged (currently not working) application  
+(probably best to delete the original .json too)    
   
 Would just upload the .exe but github has a 25mb upload limit:  
 to turn the .py into an exe you'll want to run:  
