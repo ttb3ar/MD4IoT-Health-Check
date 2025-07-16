@@ -1,6 +1,16 @@
 # MD4IoT-Health-Check  
 An application to remotley check the uptime of Microsoft Defender for IoT sensors via ping and running ssh commands.   
   
+Capabilities:  
+-encrypt credentials using AES  
+-reads encrypted file and preforms health check 
+--pings sensor ip  
+--ssh's into admin account and runs "system sanity"
+--ssh's into cyberx account and runs "uptime"
+-supports multiple sensors  
+-multi language support  
+-log and export results in .csv format  
+  
 Credentials should be stored in a .json format such as in the example file in this repo  
 The best practice would then be to encrypt it and store the resulting key in a safe place  
 (probably best to delete the original .json too)    
