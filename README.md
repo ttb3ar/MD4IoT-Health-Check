@@ -5,8 +5,8 @@ Capabilities:
 -encrypt credentials using AES  
 -reads encrypted file and preforms health check 
 --pings sensor ip  
---ssh's into admin account and runs "system sanity"
---ssh's into cyberx account and runs "uptime"
+--ssh's into admin account and runs "system sanity"  
+--ssh's into cyberx account and runs "uptime"  
 -supports multiple sensors  
 -multi language support  
 -log and export results in .csv format  
