@@ -1,5 +1,8 @@
 {
     "ja": {
+	"language_display_name: "Japanese",
+	"language_code": "ja",
+
         "app_title": "センサー管理ツール",
         "language_select": "言語選択",
         "language_english": "English",
