@@ -24,7 +24,7 @@ cd to the directory you have the application saved and:
 python MSP.py
 
 *Alternativley:*  
-Would just upload the .exe but github has a 25mb upload limit:  
+Would upload the .exe but github has a 25mb upload limit:  
 run:  
   pip install pyinstaller  
   
