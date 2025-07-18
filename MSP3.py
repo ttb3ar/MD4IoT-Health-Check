@@ -612,7 +612,7 @@ class SensorGUI:
             else:
                 output = connection.send_command_timing(
                     command, 
-                    delay_factor=1,
+                    delay_factor=10,
                     max_loops=10,
                     strip_prompt=True,
                     strip_command=True
