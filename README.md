@@ -17,7 +17,7 @@ Then encrypt using the program before storing the outputted key in a secure loca
 Best to delete the original .json  
   
 ## Setup
-Plcae the application, icon, .enc/.json files, and transaltions folder (not files) in the same directory  
+Place the application, icon, .enc/.json files, and transaltions folder (not files) in the same directory  
   
 ## To run  
 cd to the directory you have the application saved and:
