@@ -31,7 +31,7 @@ run:
 make sure you have the translation folder, favicon, and .py all in one folder. cd to that folder  
 then do:  
   
-  pyinstaller --add-data "translations;translations" --onefile --noconsole --icon=favicon.ico --name="MD4IoT SSH Ping Check" msp3.py  
+  pyinstaller --add-data "translations;translations" --onefile --noconsole --icon=favicon.ico --name="MD4IoT SSH Ping Check" MSP3.py  
 
 
 ## To do:
