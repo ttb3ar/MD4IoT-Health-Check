@@ -108,6 +108,8 @@ class SensorGUI:
         self.root = root
         self.root.title(get_message("app_title"))
         self.root.geometry("1000x700")
+
+        self.root.iconbitmap("favicon.ico")
         
         # Initialize variables
         self.source_file_var = tk.StringVar(value="flag.json")
