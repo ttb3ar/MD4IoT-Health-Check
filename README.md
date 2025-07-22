@@ -1,7 +1,7 @@
 # MD4IoT-Health-Check  
 An application to remotley check the uptime of Microsoft Defender for IoT network sensors using ping and ssh commands.   
   
-Capabilities:  
+**Features:**  
 -encrypt credentials using AES  
 -reads encrypted file and preforms health check 
 --pings sensor ip  
@@ -37,4 +37,5 @@ then do:
 ## To do:
 optimize boot speed  
 add launcher for better packaging  
-enhance logging  
+enhance logging (seperate per day/month, etc.)  
+automatic mode to go with task scheduler  
