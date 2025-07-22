@@ -38,4 +38,4 @@ then do:
 optimize boot speed  
 add launcher for better packaging  
 enhance logging (seperate per day/month, etc.)  
-automatic mode to go with task scheduler  
+automatic mode to intergrate with task scheduler  
