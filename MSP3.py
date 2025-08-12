@@ -7,7 +7,6 @@ import platform
 import threading
 import csv
 import glob
-import sys
 from datetime import datetime
 from cryptography.fernet import Fernet
 from netmiko import ConnectHandler
@@ -23,22 +22,6 @@ import pandas as pd
 
 LOG_FILE = "sensor_check.log"
 
-# Handle PyInstaller bundled environment
-def resource_path(relative_path):
-    """ Get absolute path to resource, works for dev and for PyInstaller """
-    try:
-        # PyInstaller creates a temp folder and stores path in _MEIPASS
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.path.abspath(".")
-    return os.path.join(base_path, relative_path)
-
-# Then use it for the icon
-try:
-    self.root.iconbitmap(resource_path("favicon.ico"))
-except:
-    pass  # Icon loading failed, continue without icon
-
 # Language settings
 CURRENT_LANGUAGE = "en"  # Default to English
 MESSAGES = {}
@@ -50,7 +33,7 @@ def discover_languages():
     AVAILABLE_LANGUAGES = {}
     
     # Look for translation files in the translations directory
-    if os.path.exists("translations"):
+    if os.path.exists(resource_path("translations")):
         for file_path in glob.glob("translations/*.json"):
             try:
                 with open(file_path, 'r', encoding='utf-8') as f:
@@ -77,7 +60,7 @@ def load_translations():
     discover_languages()
     
     for lang_code in AVAILABLE_LANGUAGES.keys():
-        file_path = f"translations/{lang_code}.json"
+        file_path = resource_path(f"translations/{lang_code}.json")
         try:
             if os.path.exists(file_path):
                 with open(file_path, 'r', encoding='utf-8') as f:
@@ -126,7 +109,7 @@ class SensorGUI:
         self.root.title(get_message("app_title"))
         self.root.geometry("1000x700")
 
-        self.root.iconbitmap(resource_path("favicon.ico"))
+        self.root.iconbitmap("favicon.ico")
         
         # Initialize variables
         self.source_file_var = tk.StringVar(value="flag.json")
