@@ -7,6 +7,7 @@ import platform
 import threading
 import csv
 import glob
+import sys
 from datetime import datetime
 from cryptography.fernet import Fernet
 from netmiko import ConnectHandler
@@ -21,6 +22,22 @@ from tkinter.scrolledtext import ScrolledText
 import pandas as pd
 
 LOG_FILE = "sensor_check.log"
+
+# Handle PyInstaller bundled environment
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
+
+# Then use it for the icon
+try:
+    self.root.iconbitmap(resource_path("favicon.ico"))
+except:
+    pass  # Icon loading failed, continue without icon
 
 # Language settings
 CURRENT_LANGUAGE = "en"  # Default to English
@@ -109,7 +126,7 @@ class SensorGUI:
         self.root.title(get_message("app_title"))
         self.root.geometry("1000x700")
 
-        self.root.iconbitmap("favicon.ico")
+        self.root.iconbitmap(resource_path("favicon.ico"))
         
         # Initialize variables
         self.source_file_var = tk.StringVar(value="flag.json")
