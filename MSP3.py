@@ -43,7 +43,7 @@ def discover_languages():
     
     # Look for translation files in the translations directory
     if os.path.exists(resource_path("translations")):
-        for file_path in glob.glob("translations/*.json"):
+        for file_path in glob.glob(os.path.join(resource_path("translations"), "*.json")):
             try:
                 with open(file_path, 'r', encoding='utf-8') as f:
                     data = json.load(f)
