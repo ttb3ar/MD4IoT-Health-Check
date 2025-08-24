@@ -3,7 +3,7 @@ An application to remotley check the uptime of Microsoft Defender for IoT networ
   
 **Features:**  
 -encrypt credentials using AES  
--reads encrypted file and preforms health check 
+-reads encrypted file and preforms health check   
 --pings sensor ip  
 --ssh's into admin account and runs "system sanity"  
 --ssh's into cyberx account and runs "uptime"  
