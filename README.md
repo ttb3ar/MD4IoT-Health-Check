@@ -17,6 +17,9 @@ Then encrypt using the program before storing the outputted key in a secure loca
 Best to delete the original .json  
   
 ## Setup
+Click on download to get the installer  
+  
+Alternativley:  
 Place the application, icon, .enc/.json files, and transaltions folder (contaning files) in the same directory  
   
 ## To run  
