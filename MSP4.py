@@ -637,7 +637,7 @@ class SensorGUI:
                     self.log_message(lang_manager.get_message("system_sanity_passed", ip))
                 else:
                     result["system_sanity"] = lang_manager.get_message("status_fail")
-                    self.log_message(lang_manager.get_message("system_sanity_failed", ip)
+                    self.log_message(lang_manager.get_message("system_sanity_failed", ip))
             else:
                 result["ssh_connectivity"] = lang_manager.get_message("status_fail")
                 result["system_sanity"] = lang_manager.get_message("status_error")
