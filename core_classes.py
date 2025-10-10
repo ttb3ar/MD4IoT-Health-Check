@@ -294,10 +294,10 @@ class SensorHealthChecker:
         
         # Step 1: Ping test
         if self.network_tester.ping(ip):
-            result.ping_status = "OK"
+            result.ping_status = "status_ok"
             self.logger.log(f"✓ Sensor {ip} is reachable")
         else:
-            result.ping_status = "FAIL"
+            result.ping_status = "status_fail"
             self.logger.log(f"✗ Sensor {ip} is unreachable")
             return result
         
@@ -314,20 +314,20 @@ class SensorHealthChecker:
             )
             
             if success:
-                result.ssh_connectivity = "OK"
+                result.ssh_connectivity = "status_ok"
                 if output and "system is up" in output.lower():
-                    result.system_sanity = "PASS"
+                    result.system_sanity = "status_pass"
                     self.logger.log(f"✓ System sanity passed for {ip}")
                 else:
-                    result.system_sanity = "FAIL"
+                    result.system_sanity = "status_fail"
                     self.logger.log(f"✗ System sanity failed for {ip}")
             else:
-                result.ssh_connectivity = "FAIL"
-                result.system_sanity = "ERROR"
+                result.ssh_connectivity = "status_fail"
+                result.system_sanity = "status_error"
                 self.logger.log(f"✗ SSH failed for {ip}: {error}")
         else:
-            result.ssh_connectivity = "ERROR"
-            result.system_sanity = "ERROR"
+            result.ssh_connectivity = "status_error"
+            result.system_sanity = "status_error"
             self.logger.log(f"⚠ Missing credentials for user1 on {ip}")
         
         if self._should_stop:
@@ -344,16 +344,16 @@ class SensorHealthChecker:
             
             if success:
                 if output:
-                    result.uptime_result = "PASS"
+                    result.uptime_result = "status_pass"
                     self.logger.log(f"✓ Uptime for {ip}: {output.strip()}")
                 else:
-                    result.uptime_result = "WARN"
+                    result.uptime_result = "status_warn"
                     self.logger.log(f"⚠ No uptime output for {ip}")
             else:
-                result.uptime_result = "ERROR"
+                result.uptime_result = "status_error"
                 self.logger.log(f"✗ Uptime check failed for {ip}: {error}")
         else:
-            result.uptime_result = "ERROR"
+            result.uptime_result = "status_error"
             self.logger.log(f"⚠ Missing credentials for user2 on {ip}")
         
         return result
