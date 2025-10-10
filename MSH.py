@@ -495,7 +495,15 @@ class ResultsTabView:
         # If new results, update table
         if len(results) > current_count:
             for result in results[current_count:]:
-                self.results_tree.insert("", tk.END, values=result.to_tuple())
+                translated_values = (
+                    result.sensor_name,
+                    result.ip_address,
+                    self.tm.get_message(result.ping_status),  # Translate here
+                    self.tm.get_message(result.ssh_connectivity),
+                    self.tm.get_message(result.system_sanity),
+                    self.tm.get_message(result.uptime_result)
+                )
+                self.results_tree.insert("", tk.END, values=translated_values)
         
         # Update summary
         self.update_summary()
@@ -573,6 +581,22 @@ class ResultsTabView:
             self.results_tree.heading(f"#{i+1}", text=col)
         
         self.update_summary()
+
+        for item in self.results_tree.get_children():
+            # Get the result index
+            idx = self.results_tree.index(item)
+            result = self.results_manager.get_all_results()[idx]
+            
+            # Update with translated values
+            translated_values = (
+                result.sensor_name,
+                result.ip_address,
+                self.tm.get_message(result.ping_status),
+                self.tm.get_message(result.ssh_connectivity),
+                self.tm.get_message(result.system_sanity),
+                self.tm.get_message(result.uptime_result)
+            )
+            self.results_tree.item(item, values=translated_values)
 
 
 class SensorGUI:
