@@ -225,10 +225,10 @@ class SensorResult:
     def __init__(self, sensor_name: str, ip_address: str):
         self.sensor_name = sensor_name
         self.ip_address = ip_address
-        self.ping_status = "Pending"
-        self.ssh_connectivity = "Pending"
-        self.system_sanity = "Pending"
-        self.uptime_result = "Pending"
+        self.ping_status = "status_pending"
+        self.ssh_connectivity = "status_pending"
+        self.system_sanity = "status_pending"
+        self.uptime_result = "status_pending"
         self.timestamp = datetime.now()
     
     def to_dict(self) -> Dict[str, str]:
