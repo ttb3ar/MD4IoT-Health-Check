@@ -96,6 +96,13 @@
         "authentication_failed": "認証に失敗しました",
         "network_unreachable": "ネットワークに到達できません",
         "permission_denied": "アクセス拒否",
-        "unknown_error": "不明なエラーが発生しました"
+        "unknown_error": "不明なエラーが発生しました",
+
+		"validation_error": "検証エラー",
+	    "invalid_ip": "無効なIPアドレス",
+	    "invalid_file": "無効なファイル",
+	    "invalid_key": "無効な暗号化キー",
+	    "file_too_large": "ファイルが大きすぎます",
+	    "invalid_credentials_format": "無効な認証情報形式"
     }
 }
