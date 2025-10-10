@@ -9,7 +9,7 @@ from tkinter.scrolledtext import ScrolledText
 import threading
 from typing import Optional
 from datetime import datetime
-from core_classes import ...
+from core_classes import *
 
 # Import the separated business logic classes
 from core_classes import (
