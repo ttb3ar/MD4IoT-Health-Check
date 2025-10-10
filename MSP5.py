@@ -782,9 +782,6 @@ class SensorGUI:
         
         connection = None
         try:
-        
-        connection = None
-        try:
             device = {
                 'device_type': 'terminal_server',
                 'host': ip,
@@ -927,4 +924,4 @@ def main():
     root.mainloop()
 
 if __name__ == "__main__":
-    main()message("system_sanity_passed", ip))
+    main()message("system_sanity_passed", ip)
