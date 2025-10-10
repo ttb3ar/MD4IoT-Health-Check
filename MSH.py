@@ -386,8 +386,13 @@ class HealthCheckTabView:
     
     def _update_log_text(self, message: str):
         """Update log text widget (must be called from main thread)"""
+        # Check if user is at bottom before inserting
+        at_bottom = self.log_text.yview()[1] == 1.0
+        
         self.log_text.insert(tk.END, message + "\n")
-        self.log_text.see(tk.END)
+
+        if at_bottom:
+            self.log_text.see(tk.END)
     
     def update_text(self):
         """Update all text elements (called on language change)"""
