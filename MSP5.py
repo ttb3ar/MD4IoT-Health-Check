@@ -12,6 +12,7 @@ from functools import lru_cache
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox, simpledialog
 from tkinter.scrolledtext import ScrolledText
+from input_validation import InputValidator, ValidationError, validate_credentials_file, validate_output_file
 
 # Lazy imports - only import when needed
 _netmiko_imported = False
@@ -476,28 +477,52 @@ class SensorGUI:
             
     def encrypt_file(self):
         """Encrypt the credentials file"""
-        _import_crypto()  # Import crypto only when needed
+        _import_crypto()
         
         source_file = self.source_file_var.get()
         output_file = self.output_file_var.get()
         
-        if not source_file or not os.path.exists(source_file):
-            messagebox.showerror(lang_manager.get_message("error_title"), lang_manager.get_message("file_not_found"))
+        # VALIDATION: Validate input file
+        try:
+            source_path = validate_credentials_file(source_file)
+        except ValidationError as e:
+            messagebox.showerror(lang_manager.get_message("error_title"), str(e))
+            return
+        
+        # VALIDATION: Validate output file
+        try:
+            output_path = validate_output_file(output_file)
+        except ValidationError as e:
+            messagebox.showerror(lang_manager.get_message("error_title"), str(e))
             return
             
         try:
             # Generate encryption key
             key = Fernet.generate_key()
             
-            # Read and encrypt file
-            with open(source_file, "rb") as f:
-                data = f.read()
-                
+            # Read and validate JSON structure
+            with open(source_path, "r") as f:
+                data = json.load(f)
+            
+            # VALIDATION: Validate credentials structure
+            try:
+                InputValidator.validate_credentials_structure(data)
+            except ValidationError as e:
+                messagebox.showerror(
+                    lang_manager.get_message("error_title"), 
+                    f"Invalid credentials format: {e}"
+                )
+                return
+            
+            # Convert back to bytes for encryption
+            data_bytes = json.dumps(data).encode()
+            
+            # Encrypt
             cipher = Fernet(key)
-            encrypted_data = cipher.encrypt(data)
+            encrypted_data = cipher.encrypt(data_bytes)
             
             # Save encrypted file
-            with open(output_file, "wb") as f:
+            with open(output_path, "wb") as f:
                 f.write(encrypted_data)
                 
             # Display results
@@ -507,11 +532,20 @@ class SensorGUI:
             self.encrypt_results.insert(tk.END, f"{key.decode()}\n\n")
             self.encrypt_results.insert(tk.END, f"{lang_manager.get_message('encryption_key_warning')}\n")
             
-            messagebox.showinfo(lang_manager.get_message("success_title"), lang_manager.get_message("file_encrypted"))
+            messagebox.showinfo(lang_manager.get_message("success_title"), 
+                              lang_manager.get_message("file_encrypted"))
             
+        except json.JSONDecodeError as e:
+            messagebox.showerror(
+                lang_manager.get_message("error_title"), 
+                f"Invalid JSON format: {e}"
+            )
         except Exception as e:
-            messagebox.showerror(lang_manager.get_message("error_title"), lang_manager.get_message("encryption_failed", str(e)))
-            
+            messagebox.showerror(
+                lang_manager.get_message("error_title"), 
+                lang_manager.get_message("encryption_failed", str(e))
+            )
+        
     def start_health_check(self):
         """Start health check in a separate thread"""
         if self.is_checking:
@@ -520,12 +554,18 @@ class SensorGUI:
         creds_file = self.creds_file_var.get()
         decrypt_key = self.decrypt_key_var.get()
         
-        if not creds_file or not os.path.exists(creds_file):
-            messagebox.showerror(lang_manager.get_message("error_title"), lang_manager.get_message("file_not_found"))
+        # VALIDATION: Validate credentials file
+        try:
+            creds_path = validate_credentials_file(creds_file)
+        except ValidationError as e:
+            messagebox.showerror(lang_manager.get_message("error_title"), str(e))
             return
-            
-        if not decrypt_key:
-            messagebox.showerror(lang_manager.get_message("error_title"), lang_manager.get_message("please_enter_key"))
+        
+        # VALIDATION: Validate encryption key
+        try:
+            validated_key = InputValidator.validate_encryption_key(decrypt_key)
+        except ValidationError as e:
+            messagebox.showerror(lang_manager.get_message("error_title"), str(e))
             return
             
         self.is_checking = True
@@ -536,9 +576,11 @@ class SensorGUI:
         # Clear previous results
         self.clear_results()
         
-        # Start health check thread
-        self.health_thread = threading.Thread(target=self.run_health_check, 
-                                            args=(creds_file, decrypt_key))
+        # Start health check thread - pass validated key as bytes
+        self.health_thread = threading.Thread(
+            target=self.run_health_check, 
+            args=(str(creds_path), validated_key)
+        )
         self.health_thread.daemon = True
         self.health_thread.start()
         
@@ -589,7 +631,7 @@ class SensorGUI:
         
     def load_credentials(self, encrypted_path, key):
         """Load and decrypt credentials"""
-        _import_crypto()  # Import crypto only when needed
+        _import_crypto()
         
         try:
             cipher = Fernet(key)
@@ -597,13 +639,51 @@ class SensorGUI:
                 encrypted_data = f.read()
             decrypted = cipher.decrypt(encrypted_data)
             credentials = json.loads(decrypted.decode())
+            
+            # VALIDATION: Validate credentials structure
+            try:
+                credentials = InputValidator.validate_credentials_structure(credentials)
+            except ValidationError as e:
+                self.log_message(f"Invalid credentials structure: {e}")
+                return {}
+            
             return credentials
+            
+        except json.JSONDecodeError as e:
+            self.log_message(f"Invalid JSON in credentials file: {e}")
+            return {}
         except Exception as e:
             self.log_message(lang_manager.get_message("failed_to_load_credentials", str(e)))
             return {}
             
     def check_sensor(self, ip, creds, sensor_name):
         """Check a single sensor and return results"""
+        # VALIDATION: Validate IP address
+        try:
+            ip = InputValidator.validate_ip_address(ip)
+        except ValidationError as e:
+            self.log_message(f"Invalid IP address {ip}: {e}")
+            return {
+                "sensor_name": sensor_name,
+                "ip_address": ip,
+                "ping_status": lang_manager.get_message("status_error"),
+                "ssh_connectivity": lang_manager.get_message("status_error"),
+                "system_sanity": lang_manager.get_message("status_error"),
+                "uptime_result": lang_manager.get_message("status_error")
+            }
+        
+        # VALIDATION: Sanitize sensor name
+        sensor_name = InputValidator.sanitize_sensor_name(sensor_name)
+        
+        result = {
+            "sensor_name": sensor_name,
+            "ip_address": ip,
+            "ping_status": lang_manager.get_message("status_pending"),
+            "ssh_connectivity": lang_manager.get_message("status_pending"),
+            "system_sanity": lang_manager.get_message("status_pending"),
+            "uptime_result": lang_manager.get_message("status_pending")
+        }
+        
         result = {
             "sensor_name": sensor_name,
             "ip_address": ip,
@@ -685,6 +765,23 @@ class SensorGUI:
     def run_ssh_command(self, ip, username, password, command, timeout=15):
         """Run SSH command on sensor"""
         _import_netmiko()  # Import netmiko only when needed
+
+        # VALIDATION: Validate command
+        try:
+            command = InputValidator.validate_ssh_command(command)
+        except ValidationError as e:
+            self.log_message(f"Invalid command '{command}': {e}")
+            return False, "", str(e)
+        
+        # VALIDATION: Validate timeout
+        try:
+            timeout = InputValidator.validate_timeout(timeout)
+        except ValidationError as e:
+            self.log_message(f"Invalid timeout: {e}")
+            timeout = 15  # Use default
+        
+        connection = None
+        try:
         
         connection = None
         try:
@@ -755,23 +852,50 @@ class SensorGUI:
     def export_to_csv(self):
         """Export results to CSV file"""
         if not self.results_data:
-            messagebox.showwarning(lang_manager.get_message("warning_title"), lang_manager.get_message("no_results_to_export"))
+            messagebox.showwarning(
+                lang_manager.get_message("warning_title"), 
+                lang_manager.get_message("no_results_to_export")
+            )
             return
             
         filename = filedialog.asksaveasfilename(
             title=lang_manager.get_message("save_results_csv"),
             defaultextension=".csv",
-            filetypes=[(lang_manager.get_message("csv_files"), "*.csv"), (lang_manager.get_message("all_files"), "*.*")]
+            filetypes=[
+                (lang_manager.get_message("csv_files"), "*.csv"), 
+                (lang_manager.get_message("all_files"), "*.*")
+            ]
         )
         
         if filename:
+            # VALIDATION: Validate output filename
             try:
-                _import_pandas()  # Import pandas only when needed
+                filename = InputValidator.validate_output_filename(
+                    os.path.basename(filename), 
+                    '.csv'
+                )
+                # Reconstruct full path with validated filename
+                filename = os.path.join(os.path.dirname(filename) or '.', filename)
+                
+                # Validate the full path
+                output_path = validate_output_file(filename)
+            except ValidationError as e:
+                messagebox.showerror(lang_manager.get_message("error_title"), str(e))
+                return
+            
+            try:
+                _import_pandas()
                 df = pd.DataFrame(self.results_data)
-                df.to_csv(filename, index=False)
-                messagebox.showinfo(lang_manager.get_message("success_title"), lang_manager.get_message("export_success"))
+                df.to_csv(output_path, index=False)
+                messagebox.showinfo(
+                    lang_manager.get_message("success_title"), 
+                    lang_manager.get_message("export_success")
+                )
             except Exception as e:
-                messagebox.showerror(lang_manager.get_message("error_title"), lang_manager.get_message("export_failed", str(e)))
+                messagebox.showerror(
+                    lang_manager.get_message("error_title"), 
+                    lang_manager.get_message("export_failed", str(e))
+                )
                 
     def clear_results(self):
         """Clear all results"""
