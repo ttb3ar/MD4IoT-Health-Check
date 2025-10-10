@@ -96,6 +96,13 @@
         "authentication_failed": "Authentication failed",
         "network_unreachable": "Network unreachable",
         "permission_denied": "Permission denied",
-        "unknown_error": "Unknown error occurred"
+        "unknown_error": "Unknown error occurred",
+
+		"validation_error": "Validation Error",
+	    "invalid_ip": "Invalid IP address",
+	    "invalid_file": "Invalid file",
+	    "invalid_key": "Invalid encryption key",
+	    "file_too_large": "File is too large",
+	    "invalid_credentials_format": "Invalid credentials format"
     }
 }
