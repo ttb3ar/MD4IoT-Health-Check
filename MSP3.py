@@ -19,6 +19,7 @@ import tkinter as tk
 from tkinter import ttk, filedialog, messagebox, simpledialog
 from tkinter.scrolledtext import ScrolledText
 import pandas as pd
+import sys
 
 LOG_FILE = "sensor_check.log"
 
