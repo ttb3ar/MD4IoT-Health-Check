@@ -30,16 +30,31 @@ class TranslationManager:
         self.messages = {}
         self.available_languages = {}
         self.callbacks = []
+        self.translations_path = None
         self.load_translations()
     
-    def load_translations(self):
+    def load_translations(self, custom_path: Optional[str] = None):
         """Load all translation files"""
         import json
         import os
         import glob
+
+        # Determine translations directory
+        if custom_path and os.path.exists(custom_path):
+            translations_dir = custom_path
+        else:
+            # Get the absolute path of the directory where this script is located
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            translations_dir = os.path.join(script_dir, "translations")
+
+        self.translations_path = translations_dir
+
+        # Clear existing translations
+        self.messages.clear()
+        self.available_languages.clear()
         
         # Discover and load translations
-        if os.path.exists("translations"):
+        if os.path.exists(translations_dir):
             for file_path in glob.glob(os.path.join("translations", "*.json")):
                 try:
                     with open(file_path, 'r', encoding='utf-8') as f:
