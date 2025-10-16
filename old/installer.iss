@@ -1,4 +1,4 @@
-[to be used with version 6]
+; to be used with version 6
 [Setup]
 AppName=MSP
 AppVersion=2.0.0
@@ -26,4 +26,5 @@ Name: "{group}\Uninstall MSP"; Filename: "{uninstallexe}"
 [Run]
 ; Optional: Automatically run after installation
 ; Filename: "{app}\MD4IoT SSH Ping Check.exe"; Description: "Launch MSP"; Flags: nowait postinstall skipifsilent
+
 
