@@ -70,6 +70,7 @@ class TranslationManager:
         # Fallback to English
         if not self.available_languages:
             self.available_languages = {"en": "English"}
+            self.messages["en"] = {"language_display_name": "English"}
     
     def get_message(self, key: str, *args) -> str:
         """Get translated message"""
