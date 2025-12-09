@@ -277,7 +277,7 @@ class SensorResult:
 class SensorHealthChecker:
     """Performs health checks on sensors"""
     
-    def __init__(self, logger: Optional[Logger] = None):
+    def __init__(self, logger: Optional['Logger'] = None):
         self.network_tester = NetworkTester()
         self.ssh_runner = SSHCommandRunner()
         self.logger = logger or Logger()
