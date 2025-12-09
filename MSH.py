@@ -371,8 +371,7 @@ class HealthCheckTabView:
                 if not self.is_checking:
                     break
                 
-                sensor_name = creds.get("name", ip)
-                result = self.health_checker.check_sensor(ip, creds, sensor_name)
+                result = self.health_checker.check_sensor(ip, creds)
                 
                 # Add result to results manager
                 self.results_manager.add_result(result)
