@@ -362,7 +362,7 @@ class SensorHealthChecker:
             result.uptime_result = "status_pass"
             self.logger.log(f"✓ Uptime for {ip}: {uptime_output.strip()}")
         else:
-           result.uptime_result = "status_warn"
+            result.uptime_result = "status_warn"
             self.logger.log(f"⚠ No uptime output for {ip}")
         return result
     
