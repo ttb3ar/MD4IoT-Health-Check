@@ -29,6 +29,7 @@ class Config:
     SYSTEM_SANITY_MAX_LOOPS = 20
     UPTIME_DELAY_FACTOR = 10
     UPTIME_MAX_LOOPS = 10
+    SHELL_COMMAND_DELAY = 2  # Delay for shell transitions
 
 
 class CredentialManager:
@@ -141,24 +142,24 @@ class SSHCommandRunner:
     def __init__(self, timeout: int = Config.DEFAULT_SSH_TIMEOUT):
         self.timeout = timeout
     
-    def execute_command(
-        self, 
-        ip: str, 
-        username: str, 
-        password: str, 
-        command: str
-    ) -> Tuple[bool, str, str]:
+    def execute_commands_single_session(
+        self,
+        ip: str,
+        username: str,
+        password: str
+    ) -> Tuple[bool, str, str, str, str]:
         """
-        Execute SSH command on remote host
+        Execute both system sanity and uptime checks in a single SSH session
         
         Args:
             ip: Host IP address
-            username: SSH username
-            password: SSH password
-            command: Command to execute
+            username: SSH username (initial login)
+            password: SSH password (initial login)
+            cyberx_password: Password for 'cyberx' user (su command)
             
         Returns:
-            Tuple of (success, output, error_message)
+            Tuple of (success, sanity_output, uptime_output, error_stage, error_message)
+            error_stage can be: "connection", "system_sanity", "shell", "su", "uptime"
         """
         connection = None
         try:
@@ -183,34 +184,52 @@ class SSHCommandRunner:
             
             connection = ConnectHandler(**device)
             
-            # Adjust timing based on command type
-            if "system sanity" in command.lower():
-                output = connection.send_command_timing(
-                    command,
-                    delay_factor=Config.SYSTEM_SANITY_DELAY_FACTOR,
-                    max_loops=Config.SYSTEM_SANITY_MAX_LOOPS,
-                    strip_prompt=True,
-                    strip_command=True
-                )
-            else:
-                output = connection.send_command_timing(
-                    command,
-                    delay_factor=Config.UPTIME_DELAY_FACTOR,
-                    max_loops=Config.UPTIME_MAX_LOOPS,
-                    strip_prompt=True,
-                    strip_command=True
-                )
+            # Step 1: Run system sanity as initial user
+            sanity_output = connection.send_command_timing(
+                "system sanity",
+                delay_factor=Config.SYSTEM_SANITY_DELAY_FACTOR,
+                max_loops=Config.SYSTEM_SANITY_MAX_LOOPS,
+                strip_prompt=True,
+                strip_command=True
+            )
             
-            return True, output, ""
+            # Step 2: Enter system shell
+            connection.send_command_timing(
+                "system shell",
+                delay_factor=2,
+                max_loops=5,
+                strip_prompt=False,
+                strip_command=False
+            )
+            
+            # Step 3: Switch to cyberx user with su
+            # Send su command
+            connection.write_channel("su - cyberx\n")
+            import time
+            time.sleep(1)  # Wait for password prompt
+            
+            # Clear any welcome messages
+            output = connection.read_channel()
+            
+            # Step 4: Run uptime as cyberx user
+            uptime_output = connection.send_command_timing(
+                "uptime",
+                delay_factor=Config.UPTIME_DELAY_FACTOR,
+                max_loops=Config.UPTIME_MAX_LOOPS,
+                strip_prompt=True,
+                strip_command=True
+            )
+            
+            return True, sanity_output, uptime_output, "", ""
             
         except NetmikoTimeoutException as e:
-            return False, "", f"Connection timeout: {str(e)}"
+            return False, "", "", "connection", f"Connection timeout: {str(e)}"
         except NetmikoAuthenticationException as e:
-            return False, "", f"Authentication failed: {str(e)}"
+            return False, "", "", "connection", f"Authentication failed: {str(e)}"
         except SSHException as e:
-            return False, "", f"SSH error: {str(e)}"
+            return False, "", "", "connection", f"SSH error: {str(e)}"
         except Exception as e:
-            return False, "", f"Unexpected error: {str(e)}"
+            return False, "", "", "unknown", f"Unexpected error: {str(e)}"
         finally:
             if connection:
                 try:
@@ -271,26 +290,25 @@ class SensorHealthChecker:
     def check_sensor(
         self, 
         ip: str, 
-        credentials: Dict[str, str], 
-        sensor_name: str
+        credentials: Dict[str, str]
     ) -> SensorResult:
         """
-        Perform complete health check on a sensor
+        Perform complete health check on a sensor using single login
         
         Args:
             ip: Sensor IP address
-            credentials: Dictionary with username, password, username2, password2
+            credentials: Dictionary with username, password, cyberx_password
             sensor_name: Human-readable sensor name
             
         Returns:
             SensorResult object with check results
         """
-        result = SensorResult(sensor_name, ip)
+        result = SensorResult(ip, ip)
         
         if self._should_stop:
             return result
         
-        self.logger.log(f"Checking sensor: {sensor_name} ({ip})")
+        self.logger.log(f"Checking sensor: {ip}")
         
         # Step 1: Ping test
         if self.network_tester.ping(ip):
@@ -304,58 +322,48 @@ class SensorHealthChecker:
         if self._should_stop:
             return result
         
-        # Step 2: SSH Test User 1 (System Sanity)
-        user1 = credentials.get("username")
-        pass1 = credentials.get("password")
+        # Step 2: Single SSH session for all checks
+        username = credentials.get("username")
+        password = credentials.get("password")
         
-        if user1 and pass1:
-            success, output, error = self.ssh_runner.execute_command(
-                ip, user1, pass1, "system sanity"
-            )
-            
-            if success:
-                result.ssh_connectivity = "status_ok"
-                if output and "system is up" in output.lower():
-                    result.system_sanity = "status_pass"
-                    self.logger.log(f"✓ System sanity passed for {ip}")
-                else:
-                    result.system_sanity = "status_fail"
-                    self.logger.log(f"✗ System sanity failed for {ip}")
-            else:
-                result.ssh_connectivity = "status_fail"
-                result.system_sanity = "status_error"
-                self.logger.log(f"✗ SSH failed for {ip}: {error}")
-        else:
+        if not username or not password:
             result.ssh_connectivity = "status_error"
             result.system_sanity = "status_error"
-            self.logger.log(f"⚠ Missing credentials for user1 on {ip}")
-        
-        if self._should_stop:
+            result.uptime_result = "status_error"
+            self.logger.log(f"⚠ Missing primary credentials for {ip}")
             return result
         
-        # Step 3: SSH Test User 2 (Uptime)
-        user2 = credentials.get("username2")
-        pass2 = credentials.get("password2")
-        
-        if user2 and pass2:
-            success, output, error = self.ssh_runner.execute_command(
-                ip, user2, pass2, "uptime"
+        # Execute all commands in single session
+        success, sanity_output, uptime_output, error_stage, error_msg = \
+            self.ssh_runner.execute_commands_single_session(
+                ip, username, password or ""
             )
-            
-            if success:
-                if output:
-                    result.uptime_result = "status_pass"
-                    self.logger.log(f"✓ Uptime for {ip}: {output.strip()}")
-                else:
-                    result.uptime_result = "status_warn"
-                    self.logger.log(f"⚠ No uptime output for {ip}")
-            else:
-                result.uptime_result = "status_error"
-                self.logger.log(f"✗ Uptime check failed for {ip}: {error}")
-        else:
-            result.uptime_result = "status_error"
-            self.logger.log(f"⚠ Missing credentials for user2 on {ip}")
         
+        if not success:
+            result.ssh_connectivity = "status_fail"
+            result.system_sanity = "status_error"
+            result.uptime_result = "status_error"
+            self.logger.log(f"✗ SSH session failed for {ip} at stage '{error_stage}': {error_msg}")
+            return result
+        
+        # SSH connected successfully
+        result.ssh_connectivity = "status_ok"
+        
+        # Check system sanity output
+        if sanity_output and "system is up" in sanity_output.lower():
+            result.system_sanity = "status_pass"
+            self.logger.log(f"✓ System sanity passed for {ip}")
+        else:
+            result.system_sanity = "status_fail"
+            self.logger.log(f"✗ System sanity failed for {ip}")
+        
+        # Check uptime output
+        if uptime_output:
+            result.uptime_result = "status_pass"
+            self.logger.log(f"✓ Uptime for {ip}: {uptime_output.strip()}")
+        else:
+           result.uptime_result = "status_warn"
+            self.logger.log(f"⚠ No uptime output for {ip}")
         return result
     
     def check_all_sensors(
@@ -378,8 +386,7 @@ class SensorHealthChecker:
             if self._should_stop:
                 break
             
-            sensor_name = creds.get("name", ip)
-            result = self.check_sensor(ip, creds, sensor_name)
+            result = self.check_sensor(ip, creds)
             results.append(result)
         
         return results
