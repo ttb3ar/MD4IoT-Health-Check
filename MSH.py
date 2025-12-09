@@ -471,12 +471,12 @@ class ResultsTabView:
         
         # Define columns
         columns = (
-            self.tm.get_message("sensor_name"),
+            #self.tm.get_message("sensor_name"),
             self.tm.get_message("ip_address"),
             self.tm.get_message("ping_status"),
             self.tm.get_message("ssh_connectivity"),
             self.tm.get_message("system_sanity"),
-            self.tm.get_message("uptime_result")
+            self.tm.get_message("uptime_column")
         )
         
         self.results_tree = ttk.Treeview(table_frame, columns=columns, show="headings", height=20)
@@ -511,7 +511,7 @@ class ResultsTabView:
         if len(results) > current_count:
             for result in results[current_count:]:
                 translated_values = (
-                    result.sensor_name,
+                    #result.sensor_name,
                     result.ip_address,
                     self.tm.get_message(result.ping_status),  # Translate here
                     self.tm.get_message(result.ssh_connectivity),
@@ -584,12 +584,12 @@ class ResultsTabView:
         
         # Update column headings
         columns = [
-            self.tm.get_message("sensor_name"),
+            #self.tm.get_message("sensor_name"),
             self.tm.get_message("ip_address"),
             self.tm.get_message("ping_status"),
             self.tm.get_message("ssh_connectivity"),
             self.tm.get_message("system_sanity"),
-            self.tm.get_message("uptime_result")
+            self.tm.get_message("uptime_column")
         ]
         
         for i, col in enumerate(columns):
@@ -604,7 +604,7 @@ class ResultsTabView:
             
             # Update with translated values
             translated_values = (
-                result.sensor_name,
+                #result.sensor_name,
                 result.ip_address,
                 self.tm.get_message(result.ping_status),
                 self.tm.get_message(result.ssh_connectivity),
