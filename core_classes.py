@@ -473,13 +473,13 @@ class ResultsManager:
         }
         
         for result in self.results:
-            if result.ping_status == "OK":
+            if result.ping_status == "status_ok":
                 summary["ping_ok"] += 1
-            if result.ssh_connectivity == "OK":
+            if result.ssh_connectivity == "status_ok":
                 summary["ssh_ok"] += 1
-            if result.system_sanity == "PASS":
+            if result.system_sanity == "status_pass":
                 summary["sanity_pass"] += 1
-            if result.uptime_result == "PASS":
+            if result.uptime_result == "status_pass":
                 summary["uptime_pass"] += 1
         
         return summary
