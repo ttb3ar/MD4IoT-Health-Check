@@ -21,10 +21,10 @@ from netmiko.exceptions import (
 class Config:
     """Configuration constants and settings"""
     LOG_FILE = "sensor_check.log"
-    DEFAULT_SSH_TIMEOUT = 15
-    DEFAULT_PING_TIMEOUT = 2
-    SSH_BANNER_TIMEOUT = 30
-    SSH_SESSION_TIMEOUT = 60
+    DEFAULT_SSH_TIMEOUT = 75
+    DEFAULT_PING_TIMEOUT = 75
+    SSH_BANNER_TIMEOUT = 75
+    SSH_SESSION_TIMEOUT = 75
     SYSTEM_SANITY_DELAY_FACTOR = 10
     SYSTEM_SANITY_MAX_LOOPS = 20
     UPTIME_DELAY_FACTOR = 10
