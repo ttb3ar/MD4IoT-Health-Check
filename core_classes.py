@@ -248,6 +248,7 @@ class SensorResult:
         self.ssh_connectivity = "status_pending"
         self.system_sanity = "status_pending"
         self.uptime_result = "status_pending"
+        seld.uptime_output = ""
         self.timestamp = datetime.now()
     
     def to_dict(self) -> Dict[str, str]:
@@ -259,6 +260,7 @@ class SensorResult:
             "ssh_connectivity": self.ssh_connectivity,
             "system_sanity": self.system_sanity,
             "uptime_result": self.uptime_result,
+            "uptime_output": self.uptime_output,
             "timestamp": self.timestamp.isoformat()
         }
     
@@ -360,9 +362,11 @@ class SensorHealthChecker:
         # Check uptime output
         if uptime_output:
             result.uptime_result = "status_pass"
+            result.uptime_output = uptime_output.strip()
             self.logger.log(f"✓ Uptime for {ip}: {uptime_output.strip()}")
         else:
             result.uptime_result = "status_warn"
+            result.uptime_output = ""
             self.logger.log(f"⚠ No uptime output for {ip}")
         return result
     
