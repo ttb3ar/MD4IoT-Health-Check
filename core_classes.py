@@ -360,7 +360,9 @@ class SensorHealthChecker:
             sanity_lines = sanity_output.strip().split('\n')
             for line in sanity_lines:
                 if "system is up" in line.lower():
-                    result.sanity_output = line.strip()
+                    import re
+                    clean_line = re.sub(r'\x1b\[[0-9;]*m', '', line)
+                    result.sanity_output = clean_line.strip()
                     break
                 else:
                     result.sanity_output = sanity_lines[-1].strip() if sanity_lines else ""
