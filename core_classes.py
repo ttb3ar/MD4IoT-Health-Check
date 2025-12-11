@@ -21,16 +21,16 @@ from netmiko.exceptions import (
 class Config:
     """Configuration constants and settings with file-based overrides"""
     DEFAULT_VALUES = {
-        'LOG_FILE' : "sensor_check.log",
-        'DEFAULT_SSH_TIMEOUT' : 75,
-        'DEFAULT_PING_TIMEOUT' : 75,
-        'SSH_BANNER_TIMEOUT' : 75,
-        'SSH_SESSION_TIMEOUT' : 75,
-        'SYSTEM_SANITY_DELAY_FACTOR' : 10,
-        'SYSTEM_SANITY_MAX_LOOPS' : 20,
-        'UPTIME_DELAY_FACTOR' : 10,
-        'UPTIME_MAX_LOOPS' : 10,
-        'SHELL_COMMAND_DELAY' : 2  # Delay for shell transitions
+        'log_file' : "sensor_check.log",
+        'ssh_timeout' : 75,
+        'ping_timeout' : 75,
+        'ssh_banner_timeout' : 75,
+        'ssh_session_timeout' : 75,
+        'system_sanity_delay_factor' : 10,
+        'system_sanity_max_loops' : 20,
+        'uptime_delay_factor' : 10,
+        'uptime_max_loops' : 10,
+        'shell_command_delay' : 2  # Delay for shell transitions
     }
 
     # Singleton instance
@@ -233,7 +233,7 @@ class SSHCommandRunner:
                 'username': username,
                 'password': password,
                 'timeout': self.timeout,
-                'banner_timeout': Config().SSH_BANNER_TIMEOUT,
+                'banner_timeout': Config().ssh_banner_timeout,
                 'conn_timeout': self.timeout,
                 'auth_timeout': self.timeout,
                 'session_log': None,
@@ -241,7 +241,7 @@ class SSHCommandRunner:
                 'default_enter': '\r\n',
                 'response_return': '\n',
                 'fast_cli': False,
-                'session_timeout': Config().SSH_SESSION_TIMEOUT,
+                'session_timeout': Config().ssh_session_timeout,
                 'encoding': 'utf-8',
                 'auto_connect': True
             }
@@ -251,8 +251,8 @@ class SSHCommandRunner:
             # Step 1: Run system sanity as initial user
             sanity_output = connection.send_command_timing(
                 "system sanity",
-                delay_factor=Config().SYSTEM_SANITY_DELAY_FACTOR,
-                max_loops=Config().SYSTEM_SANITY_MAX_LOOPS,
+                delay_factor=Config().system_sanity_delay_factor,
+                max_loops=Config().system_sanity_max_loops,
                 strip_prompt=True,
                 strip_command=True
             )
@@ -278,8 +278,8 @@ class SSHCommandRunner:
             # Step 4: Run uptime as cyberx user
             uptime_output = connection.send_command_timing(
                 "uptime",
-                delay_factor=Config().UPTIME_DELAY_FACTOR,
-                max_loops=Config().UPTIME_MAX_LOOPS,
+                delay_factor=Config().uptime_delay_factor,
+                max_loops=Config().uptime_max_loops,
                 strip_prompt=True,
                 strip_command=True
             )
@@ -508,7 +508,7 @@ class SensorHealthChecker:
 class Logger:
     """Handles logging to file and provides callback mechanism for GUI"""
     
-    def __init__(self, log_file: str = Config().LOG_FILE):
+    def __init__(self, log_file: str = Config().log_file):
         self.log_file = log_file
         self.callbacks = []
     
