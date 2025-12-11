@@ -634,6 +634,144 @@ class ResultsTabView:
             self.results_tree.item(item, values=translated_values)
 
 
+class SettingsDialogView:
+    """Handles the settings dialog UI"""
+    
+    def __init__(self, dialog_window, translation_manager: TranslationManager):
+        self.dialog = dialog_window
+        self.tm = translation_manager
+        self.config = Config()
+        
+        # Variables to hold setting values
+        self.setting_vars = {}
+        
+        self.create_widgets()
+        self.load_current_settings()
+    
+    def create_widgets(self):
+        """Create all widgets for settings dialog"""
+        # Title
+        title_label = ttk.Label(
+            self.dialog,
+            text="Settings",
+            font=("Arial", 12, "bold")
+        )
+        title_label.pack(pady=10)
+        
+        # Main frame with scrollbar
+        main_frame = ttk.Frame(self.dialog)
+        main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
+        
+        canvas = tk.Canvas(main_frame)
+        scrollbar = ttk.Scrollbar(main_frame, orient="vertical", command=canvas.yview)
+        scrollable_frame = ttk.Frame(canvas)
+        
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+        
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+        
+        # Create input fields for each setting
+        for key in Config.DEFAULT_VALUES.keys():
+            frame = ttk.Frame(scrollable_frame)
+            frame.pack(fill=tk.X, pady=5)
+            
+            # Label
+            label_text = key.replace('_', ' ').title()
+            ttk.Label(frame, text=label_text, width=30).pack(side=tk.LEFT)
+            
+            # Input field
+            var = tk.StringVar()
+            self.setting_vars[key] = var
+            ttk.Entry(frame, textvariable=var, width=20).pack(side=tk.LEFT, padx=5)
+            
+            # Default value label
+            default_val = Config.DEFAULT_VALUES[key]
+            ttk.Label(frame, text=f"(default: {default_val})", 
+                     foreground="gray").pack(side=tk.LEFT)
+        
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+        
+        # Buttons at bottom
+        button_frame = ttk.Frame(self.dialog)
+        button_frame.pack(fill=tk.X, padx=20, pady=10)
+        
+        ttk.Button(
+            button_frame,
+            text="Save",
+            command=self.save_settings
+        ).pack(side=tk.LEFT, padx=5)
+        
+        ttk.Button(
+            button_frame,
+            text="Reset to Defaults",
+            command=self.reset_to_defaults
+        ).pack(side=tk.LEFT, padx=5)
+        
+        ttk.Button(
+            button_frame,
+            text="Cancel",
+            command=self.dialog.destroy
+        ).pack(side=tk.RIGHT, padx=5)
+    
+    def load_current_settings(self):
+        """Load current settings into the form"""
+        current_settings = self.config.get_all_settings()
+        for key, value in current_settings.items():
+            if key in self.setting_vars:
+                self.setting_vars[key].set(str(value))
+    
+    def save_settings(self):
+        """Save settings from form"""
+        try:
+            # Validate and update each setting
+            for key, var in self.setting_vars.items():
+                value_str = var.get()
+                default_type = type(Config.DEFAULT_VALUES[key])
+                
+                # Convert to appropriate type
+                if default_type == int:
+                    value = int(value_str)
+                elif default_type == float:
+                    value = float(value_str)
+                else:
+                    value = value_str
+                
+                self.config.update_setting(key, value)
+            
+            # Save to file
+            if self.config.save_config():
+                messagebox.showinfo(
+                    "Success",
+                    "Settings saved successfully! Changes will take effect on next check."
+                )
+                self.dialog.destroy()
+            else:
+                messagebox.showerror(
+                    "Error",
+                    "Failed to save settings"
+                )
+                
+        except ValueError as e:
+            messagebox.showerror(
+                "Error",
+                f"Invalid value: {str(e)}"
+            )
+    
+    def reset_to_defaults(self):
+        """Reset all settings to defaults"""
+        if messagebox.askyesno(
+            "Confirm Reset",
+            "Reset all settings to defaults?"
+        ):
+            self.config.reset_to_defaults()
+            self.load_current_settings()
+
+
 class SensorGUI:
     """Main GUI application - orchestrates all views"""
     
@@ -656,7 +794,7 @@ class SensorGUI:
         self.create_notebook()
     
     def create_language_selection(self):
-        """Create language selection dropdown"""
+        """Create language selection dropdown and settings button"""
         lang_frame = ttk.Frame(self.root)
         lang_frame.pack(fill=tk.X, padx=10, pady=5)
         
@@ -694,6 +832,14 @@ class SensorGUI:
         
         self.language_dropdown.bind('<<ComboboxSelected>>', self.on_language_dropdown_changed)
         self.language_dropdown.pack(side=tk.LEFT, padx=10)
+
+        # Settings button
+        self.settings_btn = ttk.Button(
+            lang_frame,
+            text="⚙ Settings",  # Or use an icon
+            command=self.open_settings_dialog
+        )
+        self.settings_btn.pack(side=tk.RIGHT, padx=10)
     
     def on_language_dropdown_changed(self, event=None):
         """Handle language dropdown selection"""
@@ -711,11 +857,24 @@ class SensorGUI:
         self.notebook.tab(0, text=self.translation_manager.get_message("tab_encrypt"))
         self.notebook.tab(1, text=self.translation_manager.get_message("tab_health"))
         self.notebook.tab(2, text=self.translation_manager.get_message("tab_results"))
+        self.notebook.tab(3, text="Settings")
         
         # Update each tab view
         self.encryption_view.update_text()
         self.health_check_view.update_text()
         self.results_view.update_text()
+        self.settings_view.update_text()
+
+    def open_settings_dialog(self):
+        """Open settings in a popup dialog"""
+        dialog = tk.Toplevel(self.root)
+        dialog.title("Settings")
+        dialog.geometry("600x500")
+        dialog.transient(self.root)  # Make it a child of main window
+        dialog.grab_set()  # Make it modal
+        
+        # Create the settings view in the dialog
+        SettingsDialogView(dialog, self.translation_manager)
     
     def create_notebook(self):
         """Create main notebook with tabs"""
