@@ -510,6 +510,12 @@ class ResultsTabView:
         # If new results, update table
         if len(results) > current_count:
             for result in results[current_count:]:
+                # Format sanity display
+                sanity_display = self.tm.get_message(result.system_sanity)
+                if result.sanity_output:
+                    sanity_display = f"{sanity_display} : {result.sanity_output}"
+                
+                # Format uptime display
                 uptime_display = self.tm.get_message(result.uptime_result)
                 if result.uptime_output:
                     uptime_display = f"{uptime_display} : {result.uptime_output}"
@@ -519,7 +525,7 @@ class ResultsTabView:
                     result.ip_address,
                     self.tm.get_message(result.ping_status),  # Translate here
                     self.tm.get_message(result.ssh_connectivity),
-                    self.tm.get_message(result.system_sanity),
+                    sanity_display,
                     uptime_display
                 )
                 self.results_tree.insert("", tk.END, values=translated_values)
@@ -606,6 +612,12 @@ class ResultsTabView:
             idx = self.results_tree.index(item)
             result = self.results_manager.get_all_results()[idx]
 
+            # Format sanity display
+            sanity_display = self.tm.get_message(result.system_sanity)
+            if result.sanity_output:
+                sanity_display = f"{sanity_display} : {result.sanity_output}"
+
+            # Format uptime display
             uptime_display = self.tm.get_message(result.uptime_result)
             if result.uptime_output:
                 uptime_display = f"{uptime_display} : {result.uptime_output}"
@@ -616,7 +628,7 @@ class ResultsTabView:
                 result.ip_address,
                 self.tm.get_message(result.ping_status),
                 self.tm.get_message(result.ssh_connectivity),
-                self.tm.get_message(result.system_sanity),
+                sanity_display,
                 uptime_display
             )
             self.results_tree.item(item, values=translated_values)
