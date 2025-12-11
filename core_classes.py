@@ -19,17 +19,81 @@ from netmiko.exceptions import (
 
 
 class Config:
-    """Configuration constants and settings"""
-    LOG_FILE = "sensor_check.log"
-    DEFAULT_SSH_TIMEOUT = 75
-    DEFAULT_PING_TIMEOUT = 75
-    SSH_BANNER_TIMEOUT = 75
-    SSH_SESSION_TIMEOUT = 75
-    SYSTEM_SANITY_DELAY_FACTOR = 10
-    SYSTEM_SANITY_MAX_LOOPS = 20
-    UPTIME_DELAY_FACTOR = 10
-    UPTIME_MAX_LOOPS = 10
-    SHELL_COMMAND_DELAY = 2  # Delay for shell transitions
+    """Configuration constants and settings with file-based overrides"""
+    DEFAULT_VALUES = {
+        'LOG_FILE' : "sensor_check.log",
+        'DEFAULT_SSH_TIMEOUT' : 75,
+        'DEFAULT_PING_TIMEOUT' : 75,
+        'SSH_BANNER_TIMEOUT' : 75,
+        'SSH_SESSION_TIMEOUT' : 75,
+        'SYSTEM_SANITY_DELAY_FACTOR' : 10,
+        'SYSTEM_SANITY_MAX_LOOPS' : 20,
+        'UPTIME_DELAY_FACTOR' : 10,
+        'UPTIME_MAX_LOOPS' : 10,
+        'SHELL_COMMAND_DELAY' : 2  # Delay for shell transitions
+    }
+
+    # Singleton instance
+    _instance = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+            cls._instance._initialized = False
+        return cls._instance
+
+    def __init__(self):
+        if self._initialized:
+            return
+
+        self._initialized = True
+        self.config_file = 'settings.json'
+        self.load_config()
+
+    def load_config(self):
+        """Load config from file or use defaults"""
+        # Set defaults first
+        for key, value in self.DEFAULT_VALUES.items():
+            setattr(self, key.upper(), value)
+        
+        # Try to load from file
+        if os.path.exists(self.config_file):
+            try:
+                with open(self.config_file, 'r', encoding='utf-8') as f:
+                    user_config = json.load(f)
+                    for key, value in user_config.items():
+                        if key in self.DEFAULT_VALUES:
+                            setattr(self, key.upper(), value)
+            except Exception as e:
+                print(f"Failed to load config file: {e}")
+    
+    def save_config(self):
+        """Save current config to file"""
+        config_data = {}
+        for key in self.DEFAULT_VALUES.keys():
+            config_data[key] = getattr(self, key.upper())
+        
+        try:
+            with open(self.config_file, 'w', encoding='utf-8') as f:
+                json.dump(config_data, f, indent=4)
+            return True
+        except Exception as e:
+            print(f"Failed to save config: {e}")
+            return False
+    
+    def get_all_settings(self):
+        """Get all current settings as a dictionary"""
+        return {key: getattr(self, key.upper()) for key in self.DEFAULT_VALUES.keys()}
+    
+    def update_setting(self, key, value):
+        """Update a single setting"""
+        if key in self.DEFAULT_VALUES:
+            setattr(self, key.upper(), value)
+    
+    def reset_to_defaults(self):
+        """Reset all settings to defaults"""
+        for key, value in self.DEFAULT_VALUES.items():
+            setattr(self, key.upper(), value)
 
 
 class CredentialManager:
@@ -106,7 +170,7 @@ class NetworkTester:
     """Handles network connectivity tests"""
     
     @staticmethod
-    def ping(ip: str, timeout: int = Config.DEFAULT_PING_TIMEOUT) -> bool:
+    def ping(ip: str, timeout: int = Config().PING_TIMEOUT) -> bool:
         """
         Ping a host to check basic connectivity
         
@@ -139,7 +203,7 @@ class NetworkTester:
 class SSHCommandRunner:
     """Handles SSH command execution"""
     
-    def __init__(self, timeout: int = Config.DEFAULT_SSH_TIMEOUT):
+    def __init__(self, timeout: int = Config().SSH_TIMEOUT):
         self.timeout = timeout
     
     def execute_commands_single_session(
@@ -169,7 +233,7 @@ class SSHCommandRunner:
                 'username': username,
                 'password': password,
                 'timeout': self.timeout,
-                'banner_timeout': Config.SSH_BANNER_TIMEOUT,
+                'banner_timeout': Config().SSH_BANNER_TIMEOUT,
                 'conn_timeout': self.timeout,
                 'auth_timeout': self.timeout,
                 'session_log': None,
@@ -177,7 +241,7 @@ class SSHCommandRunner:
                 'default_enter': '\r\n',
                 'response_return': '\n',
                 'fast_cli': False,
-                'session_timeout': Config.SSH_SESSION_TIMEOUT,
+                'session_timeout': Config().SSH_SESSION_TIMEOUT,
                 'encoding': 'utf-8',
                 'auto_connect': True
             }
@@ -187,8 +251,8 @@ class SSHCommandRunner:
             # Step 1: Run system sanity as initial user
             sanity_output = connection.send_command_timing(
                 "system sanity",
-                delay_factor=Config.SYSTEM_SANITY_DELAY_FACTOR,
-                max_loops=Config.SYSTEM_SANITY_MAX_LOOPS,
+                delay_factor=Config().SYSTEM_SANITY_DELAY_FACTOR,
+                max_loops=Config().SYSTEM_SANITY_MAX_LOOPS,
                 strip_prompt=True,
                 strip_command=True
             )
@@ -214,8 +278,8 @@ class SSHCommandRunner:
             # Step 4: Run uptime as cyberx user
             uptime_output = connection.send_command_timing(
                 "uptime",
-                delay_factor=Config.UPTIME_DELAY_FACTOR,
-                max_loops=Config.UPTIME_MAX_LOOPS,
+                delay_factor=Config().UPTIME_DELAY_FACTOR,
+                max_loops=Config().UPTIME_MAX_LOOPS,
                 strip_prompt=True,
                 strip_command=True
             )
@@ -444,7 +508,7 @@ class SensorHealthChecker:
 class Logger:
     """Handles logging to file and provides callback mechanism for GUI"""
     
-    def __init__(self, log_file: str = Config.LOG_FILE):
+    def __init__(self, log_file: str = Config().LOG_FILE):
         self.log_file = log_file
         self.callbacks = []
     
