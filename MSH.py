@@ -510,13 +510,17 @@ class ResultsTabView:
         # If new results, update table
         if len(results) > current_count:
             for result in results[current_count:]:
+                uptime_display = self.tm.get_message(result.uptime_result)
+                if result.uptime_output:
+                    uptime_display = f"{uptime_display} : {result.uptime_output}"
+
                 translated_values = (
                     #result.sensor_name,
                     result.ip_address,
                     self.tm.get_message(result.ping_status),  # Translate here
                     self.tm.get_message(result.ssh_connectivity),
                     self.tm.get_message(result.system_sanity),
-                    self.tm.get_message(result.uptime_result)
+                    uptime_display
                 )
                 self.results_tree.insert("", tk.END, values=translated_values)
         
@@ -601,6 +605,10 @@ class ResultsTabView:
             # Get the result index
             idx = self.results_tree.index(item)
             result = self.results_manager.get_all_results()[idx]
+
+            uptime_display = self.tm.get_message(result.uptime_result)
+            if result.uptime_output:
+                uptime_display = f"{uptime_display} : {result.uptime_output}"
             
             # Update with translated values
             translated_values = (
@@ -609,7 +617,7 @@ class ResultsTabView:
                 self.tm.get_message(result.ping_status),
                 self.tm.get_message(result.ssh_connectivity),
                 self.tm.get_message(result.system_sanity),
-                self.tm.get_message(result.uptime_result)
+                uptime_display
             )
             self.results_tree.item(item, values=translated_values)
 
