@@ -358,7 +358,12 @@ class SensorHealthChecker:
             result.system_sanity = "status_pass"
             # Extract last line of sanity output
             sanity_lines = sanity_output.strip().split('\n')
-            result.sanity_output = sanity_lines[-1].strip() if sanity_lines else ""
+            for line in sanity_lines:
+                if "system is up" in line.lower():
+                    result.sanity_output = line.strip()
+                    break
+                else:
+                    result.sanity_output = sanity_lines[-1].strip() if sanity_lines else ""
             self.logger.log(f"✓ System sanity passed for {ip}")
         else:
             result.system_sanity = "status_fail"
