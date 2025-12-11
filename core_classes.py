@@ -365,17 +365,17 @@ class SensorHealthChecker:
             # Extract just the "up X days, HH:MM" part
             uptime_clean = uptime_output.strip()
             if "up " in uptime_clean:
-                # Find "up " and extract until the next comma after the time
+                # Find "up " and extract until the second comma
                 start = uptime_clean.find("up ")
                 if start != -1:
                     # Get everything after "up"
                     after_up = uptime_clean[start:]
-                    # Find where user count starts (usually after second comma or "user")
-                    end = after_up.find(" user")
-                    if end == -1:
-                        end = after_up.find(",", after_up.find(",") + 1)  # Second comma
-                    if end != -1:
-                        result.uptime_output = after_up[:end].strip()
+                    # Find the second comma
+                    first_comma = after_up.find(",")
+                    if first_comma != -1:
+                        second_comma = after_up.find(",", first_comma + 1)
+                    if second_comma != -1:
+                        result.uptime_output = after_up[:second_comma].strip()
                     else:
                         result.uptime_output = after_up.strip()
                 else:
