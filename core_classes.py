@@ -369,7 +369,19 @@ class SensorHealthChecker:
             self.logger.log(f"✓ System sanity passed for {ip}")
         else:
             result.system_sanity = "status_fail"
-            result.sanity_output = ""
+            # Extract "System is DOWN" message if present
+            if sanity_output:
+                import re
+                sanity_lines = sanity_output.strip().split('\n')
+                for line in sanity_lines:
+                   if "system is down" in line.lower():
+                       clean_line = re.sub(r'\x1b\[[0-9;]*m', '', line)
+                       result.sanity_output = clean_line.strip()
+                       break
+                    else:
+                        result.sanity_output = ""
+            else:
+                result.sanity_output = "" # No output if SSH didn't connect
             self.logger.log(f"✗ System sanity failed for {ip}")
         
         # Check uptime output
