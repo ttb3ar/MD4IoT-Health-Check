@@ -36,7 +36,7 @@
         "ping_status": "Ping Status",
         "ssh_connectivity": "SSH Connectivity",
         "system_sanity": "System Sanity",
-        "uptime_result": "Uptime Result",
+        "uptime_column": "Uptime Result",
         
         "status_ok": "OK",
         "status_fail": "FAIL",
