@@ -378,8 +378,8 @@ class SensorHealthChecker:
                        clean_line = re.sub(r'\x1b\[[0-9;]*m', '', line)
                        result.sanity_output = clean_line.strip()
                        break
-                    else:
-                        result.sanity_output = ""
+                else:
+                    result.sanity_output = ""
             else:
                 result.sanity_output = "" # No output if SSH didn't connect
             self.logger.log(f"✗ System sanity failed for {ip}")
