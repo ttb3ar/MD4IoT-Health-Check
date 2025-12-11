@@ -248,7 +248,7 @@ class SensorResult:
         self.ssh_connectivity = "status_pending"
         self.system_sanity = "status_pending"
         self.uptime_result = "status_pending"
-        seld.uptime_output = ""
+        self.uptime_output = ""
         self.timestamp = datetime.now()
     
     def to_dict(self) -> Dict[str, str]:
