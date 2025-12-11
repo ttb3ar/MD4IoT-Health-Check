@@ -247,6 +247,7 @@ class SensorResult:
         self.ping_status = "status_pending"
         self.ssh_connectivity = "status_pending"
         self.system_sanity = "status_pending"
+        self.sanity_output = ""
         self.uptime_result = "status_pending"
         self.uptime_output = ""
         self.timestamp = datetime.now()
@@ -259,6 +260,7 @@ class SensorResult:
             "ping_status": self.ping_status,
             "ssh_connectivity": self.ssh_connectivity,
             "system_sanity": self.system_sanity,
+            "sanity_output": self.sanity_output,
             "uptime_result": self.uptime_result,
             "uptime_output": self.uptime_output,
             "timestamp": self.timestamp.isoformat()
@@ -354,9 +356,13 @@ class SensorHealthChecker:
         # Check system sanity output
         if sanity_output and "system is up" in sanity_output.lower():
             result.system_sanity = "status_pass"
+            # Extract last line of sanity output
+            sanity_lines = sanity_output.strip().split('\n')
+            result.sanity_output = sanity_lines[-1].strip() if sanity_lines else ""
             self.logger.log(f"✓ System sanity passed for {ip}")
         else:
             result.system_sanity = "status_fail"
+            result.sanity_output = ""
             self.logger.log(f"✗ System sanity failed for {ip}")
         
         # Check uptime output
