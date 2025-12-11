@@ -362,7 +362,27 @@ class SensorHealthChecker:
         # Check uptime output
         if uptime_output:
             result.uptime_result = "status_pass"
-            result.uptime_output = uptime_output.strip()
+            # Extract just the "up X days, HH:MM" part
+            uptime_clean = uptime_output.strip()
+            if "up " in uptime_clean:
+                # Find "up " and extract until the next comma after the time
+                start = uptime_clean.find("up ")
+                if start != -1:
+                    # Get everything after "up"
+                    after_up = uptime_clean[start:]
+                    # Find where user count starts (usually after second comma or "user")
+                    end = after_up.find(" user")
+                    if end == -1:
+                        end = after_up.find(",", after_up.find(",") + 1)  # Second comma
+                    if end != -1:
+                        result.uptime_output = after_up[:end].strip()
+                    else:
+                        result.uptime_output = after_up.strip()
+                else:
+                    result.uptime_output = uptime_clean
+            else:
+                result.uptime_output = uptime_clean
+                
             self.logger.log(f"✓ Uptime for {ip}: {uptime_output.strip()}")
         else:
             result.uptime_result = "status_warn"
