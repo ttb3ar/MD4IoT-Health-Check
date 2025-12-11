@@ -42,7 +42,13 @@ optimize boot speed
 enhance logging capabilities (forwarding results to syslog, customizable output, etc.)  
 automatic mode to intergrate with task scheduler  
 
-## Screenshots:
+## Screenshots:  
+### EN:  
 <img width="1920" height="1008" alt="691043a7-c954-476b-9f45-457148c52120" src="https://github.com/user-attachments/assets/0755b1a4-8f72-477f-802f-3836f250d974" />
 <img width="1920" height="1008" alt="ebcf7ccd-aadf-4654-b29a-0f6bc1a53522" src="https://github.com/user-attachments/assets/8f25e8ec-e046-45bb-8a36-7ca85c8618ac" />
-<img width="1920" height="1008" alt="4862b87a-5937-4577-b58b-302b1558d694" src="https://github.com/user-attachments/assets/2caffc3c-b65a-49d7-bf8a-5eedaa5fd510" />
+<img width="1920" height="1008" alt="4862b87a-5937-4577-b58b-302b1558d694" src="https://github.com/user-attachments/assets/2caffc3c-b65a-49d7-bf8a-5eedaa5fd510" />  
+  
+### JP:  
+<img width="1920" height="1008" alt="106278c6-83c5-46e1-a39b-e1cc80cc89ec" src="https://github.com/user-attachments/assets/36072e46-d373-41d7-9224-04fbe8500b0e" />
+<img width="1920" height="1008" alt="ba04a0cf-3f1f-4b94-b3af-08b87aaa579e" src="https://github.com/user-attachments/assets/a20cbd66-7bb5-4844-b71f-02c337fdc10e" />
+<img width="1920" height="1008" alt="49d3d891-4a77-4c87-a52e-42df348e78a0" src="https://github.com/user-attachments/assets/eed0853f-8b3a-4c0b-b7a7-d0e6915dafa9" />
