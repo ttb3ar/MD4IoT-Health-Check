@@ -38,12 +38,11 @@ then do:
 
 
 ## To do:
-optimize boot speed  
-add launcher for better packaging  
-enhance logging (seperate per day/month, etc.)  
+optimize boot speed   
+enhance logging capabilities (forwarding results to syslog, customizable output, etc.)  
 automatic mode to intergrate with task scheduler  
 
 ## Screenshots:
-<img width="1920" height="1008" alt="ee855205-596c-4e3a-8ced-9b5a37fbebd3" src="https://github.com/user-attachments/assets/b89a44be-0fb1-4499-89c5-b128ba61f788" />
-<img width="1920" height="1008" alt="74ec6c74-9a88-4543-a263-6fb6a880bffa" src="https://github.com/user-attachments/assets/22321547-1f61-43dc-b9f3-a1a2e0ba3a5c" />
-<img width="1920" height="1008" alt="4adc5117-9805-45c3-a78b-761944530ffc" src="https://github.com/user-attachments/assets/b92d5a18-7037-47ca-a5c3-4caf84168725" />
+<img width="1920" height="1008" alt="691043a7-c954-476b-9f45-457148c52120" src="https://github.com/user-attachments/assets/0755b1a4-8f72-477f-802f-3836f250d974" />
+<img width="1920" height="1008" alt="ebcf7ccd-aadf-4654-b29a-0f6bc1a53522" src="https://github.com/user-attachments/assets/8f25e8ec-e046-45bb-8a36-7ca85c8618ac" />
+<img width="1920" height="1008" alt="4862b87a-5937-4577-b58b-302b1558d694" src="https://github.com/user-attachments/assets/2caffc3c-b65a-49d7-bf8a-5eedaa5fd510" />
