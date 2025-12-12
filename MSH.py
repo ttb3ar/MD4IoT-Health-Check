@@ -242,7 +242,7 @@ class DecryptionTabView:
         self.load_frame.pack(fill=tk.X, padx=20, pady=5)
         
         # File selection
-        file_frame = ttk.Frame(load_frame)
+        file_frame = ttk.Frame(self.load_frame)
         file_frame.pack(fill=tk.X, pady=5)
         
         self.file_label = ttk.Label(file_frame, text=self.tm.get_message("encrypted_file_label"))
@@ -290,7 +290,7 @@ class DecryptionTabView:
         self.editor_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=5)
         
         # Treeview for sensors
-        tree_frame = ttk.Frame(editor_frame)
+        tree_frame = ttk.Frame(self.editor_frame)
         tree_frame.pack(fill=tk.BOTH, expand=True)
         
         columns = (
