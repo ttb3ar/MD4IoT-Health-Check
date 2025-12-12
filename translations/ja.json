@@ -127,6 +127,8 @@
 	    "failed_to_save_file": "ファイルの保存に失敗しました: {}",
 	    "all_fields_required": "すべてのフィールドを入力してください",
 	    "warning_title": "警告",
-	    "confirm_title": "確認"
+	    "confirm_title": "確認",
+		"username_column": "ユーザー名",
+		"password_column": "パスワード"
     }
 }
