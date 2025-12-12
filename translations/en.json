@@ -129,6 +129,12 @@
 		"warning_title": "Warning",
 		"confirm_title": "Confirm",
 		"username_column": "Username",
-		"password_column": "Password"
+		"password_column": "Password",
+
+		"config_button": "Settings",
+	    "config_editor_title": "Configuration Editor",
+	    "config_editor_description": "Adjust timeout and performance settings. Values are saved to config.json",
+	    "reset_defaults_button": "Reset to Defaults",
+	    "config_saved_successfully": "Configuration saved successfully! Changes will take effect for new health checks."
     }
 }
