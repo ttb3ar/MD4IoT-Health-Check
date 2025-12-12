@@ -294,7 +294,7 @@ class DecryptionTabView:
         tree_frame.pack(fill=tk.BOTH, expand=True)
         
         columns = (
-            self.tm.get_message("ip_address_column"),
+            self.tm.get_message("ip_address"),
             self.tm.get_message("username_column"),
             self.tm.get_message("password_column")
         )
@@ -503,9 +503,9 @@ class DecryptionTabView:
         self.delete_btn.config(text=self.tm.get_message("delete_sensor_button"))
         self.save_btn.config(text=self.tm.get_message("save_encrypt_button"))
 
-        self.sensor_tree.heading("IP Address", text=self.tm.get_message("ip_address"))
-        self.sensor_tree.heading("Username", text=self.tm.get_message("username_column"))
-        self.sensor_tree.heading("Password", text=self.tm.get_message("password_column"))
+        self.sensor_tree.heading("ip", text=self.tm.get_message("ip_address"))
+        self.sensor_tree.heading("user", text=self.tm.get_message("username_column"))
+        self.sensor_tree.heading("pass", text=self.tm.get_message("password_column"))
 
 class SensorEditDialog:
     """Dialog for adding/editing sensor credentials"""
