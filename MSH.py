@@ -733,14 +733,15 @@ class ConfigEditorDialog:
 class HealthCheckTabView:
     """Handles the health check tab UI"""
     
-    def __init__(self, parent, translation_manager: TranslationManager, results_manager: ResultsManager):
+    def __init__(self, parent, translation_manager: TranslationManager, results_manager: ResultsManager, config: Config):
         self.parent = parent
         self.tm = translation_manager
         self.results_manager = results_manager
+        self.config = config
         
         self.credential_manager = CredentialManager()
-        self.logger = Logger()
-        self.health_checker = SensorHealthChecker(self.logger)
+        self.logger = Logger(config.LOG_FILE)
+        self.health_checker = SensorHealthChecker(self.logger, config)
         
         # Variables
         self.creds_file_var = tk.StringVar(value="sensor_credentials.enc")
@@ -1157,6 +1158,9 @@ class SensorGUI:
     
     def __init__(self, root):
         self.root = root
+
+        # Initialize config first
+        self.config = Config()
         
         # Initialize managers
         self.translation_manager = TranslationManager()
@@ -1174,7 +1178,7 @@ class SensorGUI:
         self.create_notebook()
     
     def create_language_selection(self):
-        """Create language selection dropdown"""
+        """Create language selection dropdown and config button"""
         lang_frame = ttk.Frame(self.root)
         lang_frame.pack(fill=tk.X, padx=10, pady=5)
         
@@ -1212,6 +1216,18 @@ class SensorGUI:
         
         self.language_dropdown.bind('<<ComboboxSelected>>', self.on_language_dropdown_changed)
         self.language_dropdown.pack(side=tk.LEFT, padx=10)
+
+        # Add Config button
+        self.config_btn = ttk.Button(
+            lang_frame,
+            text=self.translation_manager.get_message("config_button"),
+            command=self.open_config_editor
+        )
+        self.config_btn.pack(side=tk.LEFT, padx=10)
+
+    def open_config_editor(self):
+    """Open configuration editor dialog"""
+    ConfigEditorDialog(self.root, self.translation_manager, self.config)
     
     def on_language_dropdown_changed(self, event=None):
         """Handle language dropdown selection"""
@@ -1254,7 +1270,8 @@ class SensorGUI:
         self.health_check_view = HealthCheckTabView(
             health_frame,
             self.translation_manager,
-            self.results_manager
+            self.results_manager,
+            self.config
         )
         self.results_view = ResultsTabView(
             results_frame,
