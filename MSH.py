@@ -1226,8 +1226,8 @@ class SensorGUI:
         self.config_btn.pack(side=tk.LEFT, padx=10)
 
     def open_config_editor(self):
-    """Open configuration editor dialog"""
-    ConfigEditorDialog(self.root, self.translation_manager, self.config)
+        """Open configuration editor dialog"""
+        ConfigEditorDialog(self.root, self.translation_manager, self.config)
     
     def on_language_dropdown_changed(self, event=None):
         """Handle language dropdown selection"""
