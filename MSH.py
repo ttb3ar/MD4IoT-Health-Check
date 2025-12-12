@@ -238,8 +238,8 @@ class DecryptionTabView:
         self.title_label.pack(pady=10)
         
         # Load section
-        load_frame = ttk.LabelFrame(self.parent, text=self.tm.get_message("load_file_section"), padding=10)
-        load_frame.pack(fill=tk.X, padx=20, pady=5)
+        self.load_frame = ttk.LabelFrame(self.parent, text=self.tm.get_message("load_file_section"), padding=10)
+        self.load_frame.pack(fill=tk.X, padx=20, pady=5)
         
         # File selection
         file_frame = ttk.Frame(load_frame)
@@ -286,18 +286,28 @@ class DecryptionTabView:
         self.save_btn.pack(side=tk.LEFT, padx=5)
         
         # Editor section
-        editor_frame = ttk.LabelFrame(self.parent, text=self.tm.get_message("sensor_editor_section"), padding=10)
-        editor_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=5)
+        self.editor_frame = ttk.LabelFrame(self.parent, text=self.tm.get_message("sensor_editor_section"), padding=10)
+        self.editor_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=5)
         
         # Treeview for sensors
         tree_frame = ttk.Frame(editor_frame)
         tree_frame.pack(fill=tk.BOTH, expand=True)
         
-        columns = ("IP Address", "Username", "Password")
-        self.sensor_tree = ttk.Treeview(tree_frame, columns=columns, show="headings", height=10)
+        columns = (
+            self.tm.get_message("ip_address_column"),
+            self.tm.get_message("username_column"),
+            self.tm.get_message("password_column")
+        )
+        # Use fixed column IDs
+        self.sensor_tree = ttk.Treeview(tree_frame, columns=("ip", "user", "pass"), show="headings", height=10)
         
-        for col in columns:
-            self.sensor_tree.heading(col, text=col)
+        # Set initial headings with translations
+        self.sensor_tree.heading("ip", text=self.tm.get_message("ip_address"))
+        self.sensor_tree.heading("user", text=self.tm.get_message("username_column"))
+        self.sensor_tree.heading("pass", text=self.tm.get_message("password_column"))
+        
+        # Set column widths
+        for col in ("ip", "user", "pass"):
             self.sensor_tree.column(col, width=150)
         
         scrollbar = ttk.Scrollbar(tree_frame, orient=tk.VERTICAL, command=self.sensor_tree.yview)
@@ -482,6 +492,8 @@ class DecryptionTabView:
     def update_text(self):
         """Update all text elements"""
         self.title_label.config(text=self.tm.get_message("decrypt_edit_title"))
+        self.load_frame.config(text=self.tm.get_message("load_file_section"))
+        self.editor_frame.config(text=self.tm.get_message("sensor_editor_section"))
         self.file_label.config(text=self.tm.get_message("encrypted_file_label"))
         self.browse_btn.config(text=self.tm.get_message("browse_button"))
         self.key_label.config(text=self.tm.get_message("decrypt_key_label"))
@@ -491,6 +503,9 @@ class DecryptionTabView:
         self.delete_btn.config(text=self.tm.get_message("delete_sensor_button"))
         self.save_btn.config(text=self.tm.get_message("save_encrypt_button"))
 
+        self.sensor_tree.heading("IP Address", text=self.tm.get_message("ip_address"))
+        self.sensor_tree.heading("Username", text=self.tm.get_message("username_column"))
+        self.sensor_tree.heading("Password", text=self.tm.get_message("password_column"))
 
 class SensorEditDialog:
     """Dialog for adding/editing sensor credentials"""
