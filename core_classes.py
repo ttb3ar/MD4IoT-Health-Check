@@ -20,16 +20,98 @@ from netmiko.exceptions import (
 
 class Config:
     """Configuration constants and settings"""
-    LOG_FILE = "sensor_check.log"
-    DEFAULT_SSH_TIMEOUT = 75
-    DEFAULT_PING_TIMEOUT = 75
-    SSH_BANNER_TIMEOUT = 75
-    SSH_SESSION_TIMEOUT = 75
-    SYSTEM_SANITY_DELAY_FACTOR = 10
-    SYSTEM_SANITY_MAX_LOOPS = 20
-    UPTIME_DELAY_FACTOR = 10
-    UPTIME_MAX_LOOPS = 10
-    SHELL_COMMAND_DELAY = 2  # Delay for shell transitions
+    
+    # Default values
+    DEFAULTS = {
+        "LOG_FILE": "sensor_check.log",
+        "DEFAULT_SSH_TIMEOUT": 75,
+        "DEFAULT_PING_TIMEOUT": 75,
+        "SSH_BANNER_TIMEOUT": 75,
+        "SSH_SESSION_TIMEOUT": 75,
+        "SYSTEM_SANITY_DELAY_FACTOR": 10,
+        "SYSTEM_SANITY_MAX_LOOPS": 20,
+        "UPTIME_DELAY_FACTOR": 10,
+        "UPTIME_MAX_LOOPS": 10,
+        "SHELL_COMMAND_DELAY": 2
+    }
+    
+    def __init__(self, config_file: str = "config.json"):
+        self.config_file = config_file
+        self.settings = self.DEFAULTS.copy()
+        self.load_config()
+    
+    def load_config(self):
+        """Load configuration from file"""
+        if os.path.exists(self.config_file):
+            try:
+                with open(self.config_file, 'r', encoding='utf-8') as f:
+                    loaded = json.load(f)
+                    # Update settings with loaded values
+                    self.settings.update(loaded)
+            except Exception as e:
+                print(f"Failed to load config: {e}")
+    
+    def save_config(self):
+        """Save configuration to file"""
+        try:
+            with open(self.config_file, 'w', encoding='utf-8') as f:
+                json.dump(self.settings, f, indent=2)
+        except Exception as e:
+            raise ValueError(f"Failed to save config: {str(e)}")
+    
+    def get(self, key: str):
+        """Get a configuration value"""
+        return self.settings.get(key, self.DEFAULTS.get(key))
+    
+    def set(self, key: str, value):
+        """Set a configuration value"""
+        if key in self.DEFAULTS:
+            self.settings[key] = value
+    
+    def reset_to_defaults(self):
+        """Reset all settings to defaults"""
+        self.settings = self.DEFAULTS.copy()
+    
+    # Property accessors for backward compatibility
+    @property
+    def LOG_FILE(self):
+        return self.get("LOG_FILE")
+    
+    @property
+    def DEFAULT_SSH_TIMEOUT(self):
+        return self.get("DEFAULT_SSH_TIMEOUT")
+    
+    @property
+    def DEFAULT_PING_TIMEOUT(self):
+        return self.get("DEFAULT_PING_TIMEOUT")
+    
+    @property
+    def SSH_BANNER_TIMEOUT(self):
+        return self.get("SSH_BANNER_TIMEOUT")
+    
+    @property
+    def SSH_SESSION_TIMEOUT(self):
+        return self.get("SSH_SESSION_TIMEOUT")
+    
+    @property
+    def SYSTEM_SANITY_DELAY_FACTOR(self):
+        return self.get("SYSTEM_SANITY_DELAY_FACTOR")
+    
+    @property
+    def SYSTEM_SANITY_MAX_LOOPS(self):
+        return self.get("SYSTEM_SANITY_MAX_LOOPS")
+    
+    @property
+    def UPTIME_DELAY_FACTOR(self):
+        return self.get("UPTIME_DELAY_FACTOR")
+    
+    @property
+    def UPTIME_MAX_LOOPS(self):
+        return self.get("UPTIME_MAX_LOOPS")
+    
+    @property
+    def SHELL_COMMAND_DELAY(self):
+        return self.get("SHELL_COMMAND_DELAY")
 
 
 class CredentialManager:
@@ -106,7 +188,7 @@ class NetworkTester:
     """Handles network connectivity tests"""
     
     @staticmethod
-    def ping(ip: str, timeout: int = Config.DEFAULT_PING_TIMEOUT) -> bool:
+    def ping(ip: str, timeout: int, config: Config) -> bool:
         """
         Ping a host to check basic connectivity
         
@@ -139,8 +221,9 @@ class NetworkTester:
 class SSHCommandRunner:
     """Handles SSH command execution"""
     
-    def __init__(self, timeout: int = Config.DEFAULT_SSH_TIMEOUT):
-        self.timeout = timeout
+    def __init__(self, config: Config):
+        self.config = config
+        self.timeout = config.DEFAULT_SSH_TIMEOUT
     
     def execute_commands_single_session(
         self,
@@ -281,10 +364,11 @@ class SensorResult:
 class SensorHealthChecker:
     """Performs health checks on sensors"""
     
-    def __init__(self, logger: Optional['Logger'] = None):
-        self.network_tester = NetworkTester()
-        self.ssh_runner = SSHCommandRunner()
-        self.logger = logger or Logger()
+    def __init__(self, logger: Optional['Logger'] = None, config: Optional[Config] = None):
+        self.config = config or Config()
+        self.network_tester = NetworkTester(self.config)
+        self.ssh_runner = SSHCommandRunner(self.config)
+        self.logger = logger or Logger(self.config.LOG_FILE)
         self._should_stop = False
     
     def stop(self):
