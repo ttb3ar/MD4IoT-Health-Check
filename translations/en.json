@@ -127,6 +127,8 @@
 		"failed_to_save_file": "Failed to save file: {}",
 		"all_fields_required": "All fields are required",
 		"warning_title": "Warning",
-		"confirm_title": "Confirm"
+		"confirm_title": "Confirm",
+		"username_column": "Username",
+		"password_column": "Password"
     }
 }
