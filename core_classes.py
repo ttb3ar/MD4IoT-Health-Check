@@ -187,18 +187,23 @@ class CredentialManager:
 class NetworkTester:
     """Handles network connectivity tests"""
     
-    @staticmethod
-    def ping(ip: str, timeout: int, config: Config) -> bool:
+    def __init__(self, config: Config):
+        self.config = config
+    
+    def ping(self, ip: str, timeout: Optional[int] = None) -> bool:
         """
         Ping a host to check basic connectivity
         
         Args:
             ip: IP address to ping
-            timeout: Timeout in seconds
+            timeout: Timeout in seconds (uses config default if None)
             
         Returns:
             True if ping successful, False otherwise
         """
+        if timeout is None:
+            timeout = self.config.DEFAULT_PING_TIMEOUT
+            
         try:
             system = platform.system().lower()
             if system == "windows":
@@ -233,16 +238,6 @@ class SSHCommandRunner:
     ) -> Tuple[bool, str, str, str, str]:
         """
         Execute both system sanity and uptime checks in a single SSH session
-        
-        Args:
-            ip: Host IP address
-            username: SSH username (initial login)
-            password: SSH password (initial login)
-            cyberx_password: Password for 'cyberx' user (su command)
-            
-        Returns:
-            Tuple of (success, sanity_output, uptime_output, error_stage, error_message)
-            error_stage can be: "connection", "system_sanity", "shell", "su", "uptime"
         """
         connection = None
         try:
@@ -252,7 +247,7 @@ class SSHCommandRunner:
                 'username': username,
                 'password': password,
                 'timeout': self.timeout,
-                'banner_timeout': Config.SSH_BANNER_TIMEOUT,
+                'banner_timeout': self.config.SSH_BANNER_TIMEOUT,  # Use self.config
                 'conn_timeout': self.timeout,
                 'auth_timeout': self.timeout,
                 'session_log': None,
@@ -260,7 +255,7 @@ class SSHCommandRunner:
                 'default_enter': '\r\n',
                 'response_return': '\n',
                 'fast_cli': False,
-                'session_timeout': Config.SSH_SESSION_TIMEOUT,
+                'session_timeout': self.config.SSH_SESSION_TIMEOUT,  # Use self.config
                 'encoding': 'utf-8',
                 'auto_connect': True
             }
@@ -270,8 +265,8 @@ class SSHCommandRunner:
             # Step 1: Run system sanity as initial user
             sanity_output = connection.send_command_timing(
                 "system sanity",
-                delay_factor=Config.SYSTEM_SANITY_DELAY_FACTOR,
-                max_loops=Config.SYSTEM_SANITY_MAX_LOOPS,
+                delay_factor=self.config.SYSTEM_SANITY_DELAY_FACTOR,  # Use self.config
+                max_loops=self.config.SYSTEM_SANITY_MAX_LOOPS,  # Use self.config
                 strip_prompt=True,
                 strip_command=True
             )
@@ -286,10 +281,9 @@ class SSHCommandRunner:
             )
             
             # Step 3: Switch to cyberx user with su
-            # Send su command
             connection.write_channel("su - cyberx\n")
             import time
-            time.sleep(1)  # Wait for password prompt
+            time.sleep(1)
             
             # Clear any welcome messages
             output = connection.read_channel()
@@ -297,8 +291,8 @@ class SSHCommandRunner:
             # Step 4: Run uptime as cyberx user
             uptime_output = connection.send_command_timing(
                 "uptime",
-                delay_factor=Config.UPTIME_DELAY_FACTOR,
-                max_loops=Config.UPTIME_MAX_LOOPS,
+                delay_factor=self.config.UPTIME_DELAY_FACTOR,  # Use self.config
+                max_loops=self.config.UPTIME_MAX_LOOPS,  # Use self.config
                 strip_prompt=True,
                 strip_command=True
             )
@@ -529,7 +523,7 @@ class Logger:
     """Handles logging to file and provides callback mechanism for GUI"""
     
     def __init__(self, log_file: str = Config.LOG_FILE):
-        self.log_file = log_file
+        self.log_file = log_file or "sensor_check.log"
         self.callbacks = []
     
     def add_callback(self, callback):
