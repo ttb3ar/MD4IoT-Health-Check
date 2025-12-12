@@ -576,6 +576,159 @@ class SensorEditDialog:
         """Handle Cancel button"""
         self.dialog.destroy()
 
+class ConfigEditorDialog:
+    """Dialog for editing configuration settings"""
+    
+    def __init__(self, parent, tm: TranslationManager, config: Config):
+        self.tm = tm
+        self.config = config
+        self.result = False
+        
+        self.dialog = tk.Toplevel(parent)
+        self.dialog.title(tm.get_message("config_editor_title"))
+        self.dialog.geometry("500x600")
+        self.dialog.transient(parent)
+        self.dialog.grab_set()
+        
+        # Store original values for cancel
+        self.original_settings = config.settings.copy()
+        
+        # Variables for each config item
+        self.vars = {}
+        for key in Config.DEFAULTS.keys():
+            self.vars[key] = tk.StringVar(value=str(config.get(key)))
+        
+        self.create_widgets()
+        
+        # Center dialog
+        self.dialog.update_idletasks()
+        x = (self.dialog.winfo_screenwidth() // 2) - (self.dialog.winfo_width() // 2)
+        y = (self.dialog.winfo_screenheight() // 2) - (self.dialog.winfo_height() // 2)
+        self.dialog.geometry(f"+{x}+{y}")
+        
+        self.dialog.wait_window()
+    
+    def create_widgets(self):
+        """Create dialog widgets"""
+        # Title
+        ttk.Label(
+            self.dialog,
+            text=self.tm.get_message("config_editor_description"),
+            wraplength=450
+        ).pack(pady=10, padx=10)
+        
+        # Scrollable frame for config items
+        canvas = tk.Canvas(self.dialog)
+        scrollbar = ttk.Scrollbar(self.dialog, orient="vertical", command=canvas.yview)
+        scrollable_frame = ttk.Frame(canvas)
+        
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+        
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+        
+        # Config items
+        row = 0
+        for key, default_value in Config.DEFAULTS.items():
+            # Label
+            label_text = key.replace("_", " ").title()
+            ttk.Label(scrollable_frame, text=label_text).grid(
+                row=row, column=0, padx=10, pady=5, sticky=tk.W
+            )
+            
+            # Entry
+            entry = ttk.Entry(scrollable_frame, textvariable=self.vars[key], width=20)
+            entry.grid(row=row, column=1, padx=10, pady=5)
+            
+            # Default value label
+            ttk.Label(
+                scrollable_frame,
+                text=f"(default: {default_value})",
+                foreground="gray"
+            ).grid(row=row, column=2, padx=5, pady=5, sticky=tk.W)
+            
+            row += 1
+        
+        canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=10, pady=10)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        # Buttons
+        btn_frame = ttk.Frame(self.dialog)
+        btn_frame.pack(fill=tk.X, pady=10, padx=10)
+        
+        ttk.Button(
+            btn_frame,
+            text=self.tm.get_message("reset_defaults_button"),
+            command=self.reset_defaults
+        ).pack(side=tk.LEFT, padx=5)
+        
+        ttk.Button(
+            btn_frame,
+            text=self.tm.get_message("ok_button"),
+            command=self.on_ok
+        ).pack(side=tk.RIGHT, padx=5)
+        
+        ttk.Button(
+            btn_frame,
+            text=self.tm.get_message("cancel_button"),
+            command=self.on_cancel
+        ).pack(side=tk.RIGHT, padx=5)
+    
+    def reset_defaults(self):
+        """Reset all values to defaults"""
+        for key, default_value in Config.DEFAULTS.items():
+            self.vars[key].set(str(default_value))
+    
+    def on_ok(self):
+        """Handle OK button"""
+        try:
+            # Validate and save all values
+            for key, var in self.vars.items():
+                value_str = var.get().strip()
+                
+                # Try to convert to appropriate type
+                if key == "LOG_FILE":
+                    self.config.set(key, value_str)
+                else:
+                    # Try to parse as number
+                    try:
+                        if '.' in value_str:
+                            value = float(value_str)
+                        else:
+                            value = int(value_str)
+                        self.config.set(key, value)
+                    except ValueError:
+                        messagebox.showerror(
+                            self.tm.get_message("error_title"),
+                            f"Invalid value for {key}: {value_str}"
+                        )
+                        return
+            
+            # Save to file
+            self.config.save_config()
+            self.result = True
+            
+            messagebox.showinfo(
+                self.tm.get_message("success_title"),
+                self.tm.get_message("config_saved_successfully")
+            )
+            
+            self.dialog.destroy()
+            
+        except Exception as e:
+            messagebox.showerror(
+                self.tm.get_message("error_title"),
+                f"Failed to save config: {str(e)}"
+            )
+    
+    def on_cancel(self):
+        """Handle Cancel button"""
+        # Restore original settings
+        self.config.settings = self.original_settings
+        self.dialog.destroy()
 
 class HealthCheckTabView:
     """Handles the health check tab UI"""
