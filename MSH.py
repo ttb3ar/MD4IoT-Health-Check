@@ -212,6 +212,353 @@ class EncryptionTabView:
         self.encrypt_btn.config(text=self.tm.get_message("encrypt_button"))
 
 
+class DecryptionTabView:
+    """Handles the decryption and sensor editing tab UI"""
+    
+    def __init__(self, parent, translation_manager: TranslationManager):
+        self.parent = parent
+        self.tm = translation_manager
+        self.credential_manager = CredentialManager()
+        
+        # Variables
+        self.encrypted_file_var = tk.StringVar(value="sensor_credentials.enc")
+        self.decrypt_key_var = tk.StringVar()
+        self.credentials_data = {}  # Store decrypted data
+        
+        self.create_widgets()
+    
+    def create_widgets(self):
+        """Create all widgets for decryption/editor tab"""
+        # Title
+        self.title_label = ttk.Label(
+            self.parent, 
+            text=self.tm.get_message("decrypt_edit_title"),
+            font=("Arial", 12, "bold")
+        )
+        self.title_label.pack(pady=10)
+        
+        # Load section
+        load_frame = ttk.LabelFrame(self.parent, text=self.tm.get_message("load_file_section"), padding=10)
+        load_frame.pack(fill=tk.X, padx=20, pady=5)
+        
+        # File selection
+        file_frame = ttk.Frame(load_frame)
+        file_frame.pack(fill=tk.X, pady=5)
+        
+        self.file_label = ttk.Label(file_frame, text=self.tm.get_message("encrypted_file_label"))
+        file_label.pack(side=tk.LEFT)
+        
+        ttk.Entry(file_frame, textvariable=self.encrypted_file_var, width=40).pack(side=tk.LEFT, padx=5)
+        
+        self.browse_btn = ttk.Button(
+            file_frame,
+            text=self.tm.get_message("browse_button"),
+            command=self.browse_encrypted_file
+        )
+        self.browse_btn.pack(side=tk.LEFT, padx=5)
+        
+        # Decryption key
+        key_frame = ttk.Frame(load_frame)
+        key_frame.pack(fill=tk.X, pady=5)
+        
+        self.key_label = ttk.Label(key_frame, text=self.tm.get_message("decrypt_key_label"))
+        self.key_label.pack(side=tk.LEFT)
+        
+        ttk.Entry(key_frame, textvariable=self.decrypt_key_var, width=40, show="*").pack(side=tk.LEFT, padx=5)
+        
+        # Load button
+        self.load_btn = ttk.Button(
+            load_frame,
+            text=self.tm.get_message("load_decrypt_button"),
+            command=self.load_and_decrypt
+        )
+        self.load_btn.pack(pady=5)
+        
+        # Editor section
+        editor_frame = ttk.LabelFrame(self.parent, text=self.tm.get_message("sensor_editor_section"), padding=10)
+        editor_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=5)
+        
+        # Treeview for sensors
+        tree_frame = ttk.Frame(editor_frame)
+        tree_frame.pack(fill=tk.BOTH, expand=True)
+        
+        columns = ("IP Address", "Username", "Password")
+        self.sensor_tree = ttk.Treeview(tree_frame, columns=columns, show="headings", height=10)
+        
+        for col in columns:
+            self.sensor_tree.heading(col, text=col)
+            self.sensor_tree.column(col, width=150)
+        
+        scrollbar = ttk.Scrollbar(tree_frame, orient=tk.VERTICAL, command=self.sensor_tree.yview)
+        self.sensor_tree.configure(yscrollcommand=scrollbar.set)
+        
+        self.sensor_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        # Editor buttons
+        btn_frame = ttk.Frame(editor_frame)
+        btn_frame.pack(fill=tk.X, pady=10)
+        
+        self.add_btn = ttk.Button(btn_frame, text=self.tm.get_message("add_sensor_button"), command=self.add_sensor)
+        self.add_btn.pack(side=tk.LEFT, padx=5)
+        
+        self.edit_btn = ttk.Button(btn_frame, text=self.tm.get_message("edit_sensor_button"), command=self.edit_sensor)
+        self.edit_btn.pack(side=tk.LEFT, padx=5)
+        
+        self.delete_btn = ttk.Button(btn_frame, text=self.tm.get_message("delete_sensor_button"), command=self.delete_sensor)
+        self.delete_btn.pack(side=tk.LEFT, padx=5)
+        
+        # Save section
+        save_frame = ttk.Frame(self.parent)
+        save_frame.pack(fill=tk.X, padx=20, pady=10)
+        
+        self.save_btn = ttk.Button(
+            save_frame,
+            text=self.tm.get_message("save_encrypt_button"),
+            command=self.save_and_encrypt,
+            state=tk.DISABLED
+        )
+        self.save_btn.pack()
+    
+    def browse_encrypted_file(self):
+        """Browse for encrypted file"""
+        filename = filedialog.askopenfilename(
+            title=self.tm.get_message("select_encrypted_file"),
+            filetypes=[
+                (self.tm.get_message("encrypted_files"), "*.enc"),
+                (self.tm.get_message("all_files"), "*.*")
+            ]
+        )
+        if filename:
+            self.encrypted_file_var.set(filename)
+    
+    def load_and_decrypt(self):
+        """Load and decrypt the file"""
+        encrypted_file = self.encrypted_file_var.get()
+        decrypt_key = self.decrypt_key_var.get()
+        
+        if not encrypted_file or not decrypt_key:
+            messagebox.showerror(
+                self.tm.get_message("error_title"),
+                self.tm.get_message("please_provide_file_and_key")
+            )
+            return
+        
+        try:
+            key = decrypt_key.encode()
+            self.credentials_data = self.credential_manager.decrypt_file(encrypted_file, key)
+            self.populate_tree()
+            self.save_btn.config(state=tk.NORMAL)
+            messagebox.showinfo(
+                self.tm.get_message("success_title"),
+                self.tm.get_message("file_loaded_successfully")
+            )
+        except Exception as e:
+            messagebox.showerror(
+                self.tm.get_message("error_title"),
+                self.tm.get_message("failed_to_load_file", str(e))
+            )
+    
+    def populate_tree(self):
+        """Populate tree with sensor data"""
+        # Clear existing items
+        for item in self.sensor_tree.get_children():
+            self.sensor_tree.delete(item)
+        
+        # Add sensors
+        for ip, creds in self.credentials_data.items():
+            username = creds.get("username", "")
+            password = creds.get("password", "")
+            self.sensor_tree.insert("", tk.END, values=(ip, username, "•" * len(password)))
+    
+    def add_sensor(self):
+        """Add a new sensor"""
+        dialog = SensorEditDialog(self.parent, self.tm, None)
+        if dialog.result:
+            ip, username, password = dialog.result
+            if ip in self.credentials_data:
+                messagebox.showwarning(
+                    self.tm.get_message("warning_title"),
+                    self.tm.get_message("sensor_already_exists")
+                )
+                return
+            self.credentials_data[ip] = {"username": username, "password": password}
+            self.populate_tree()
+    
+    def edit_sensor(self):
+        """Edit selected sensor"""
+        selection = self.sensor_tree.selection()
+        if not selection:
+            messagebox.showwarning(
+                self.tm.get_message("warning_title"),
+                self.tm.get_message("please_select_sensor")
+            )
+            return
+        
+        item = selection[0]
+        values = self.sensor_tree.item(item)["values"]
+        ip = values[0]
+        
+        current_creds = self.credentials_data.get(ip, {})
+        dialog = SensorEditDialog(self.parent, self.tm, (ip, current_creds.get("username", ""), current_creds.get("password", "")))
+        
+        if dialog.result:
+            new_ip, username, password = dialog.result
+            # Remove old entry if IP changed
+            if new_ip != ip:
+                del self.credentials_data[ip]
+            self.credentials_data[new_ip] = {"username": username, "password": password}
+            self.populate_tree()
+    
+    def delete_sensor(self):
+        """Delete selected sensor"""
+        selection = self.sensor_tree.selection()
+        if not selection:
+            messagebox.showwarning(
+                self.tm.get_message("warning_title"),
+                self.tm.get_message("please_select_sensor")
+            )
+            return
+        
+        item = selection[0]
+        values = self.sensor_tree.item(item)["values"]
+        ip = values[0]
+        
+        if messagebox.askyesno(
+            self.tm.get_message("confirm_title"),
+            self.tm.get_message("confirm_delete_sensor", ip)
+        ):
+            del self.credentials_data[ip]
+            self.populate_tree()
+    
+    def save_and_encrypt(self):
+        """Save and encrypt the modified data"""
+        if not self.credentials_data:
+            messagebox.showwarning(
+                self.tm.get_message("warning_title"),
+                self.tm.get_message("no_data_to_save")
+            )
+            return
+        
+        output_file = filedialog.asksaveasfilename(
+            title=self.tm.get_message("save_encrypted_file"),
+            defaultextension=".enc",
+            filetypes=[
+                (self.tm.get_message("encrypted_files"), "*.enc"),
+                (self.tm.get_message("all_files"), "*.*")
+            ]
+        )
+        
+        if not output_file:
+            return
+        
+        try:
+            # Save to temp JSON
+            import tempfile
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as temp_file:
+                json.dump(self.credentials_data, temp_file)
+                temp_filename = temp_file.name
+            
+            # Encrypt
+            key = self.decrypt_key_var.get().encode()
+            self.credential_manager.encrypt_file(temp_filename, output_file, key)
+            
+            # Clean up temp file
+            os.remove(temp_filename)
+            
+            messagebox.showinfo(
+                self.tm.get_message("success_title"),
+                self.tm.get_message("file_saved_successfully")
+            )
+        except Exception as e:
+            messagebox.showerror(
+                self.tm.get_message("error_title"),
+                self.tm.get_message("failed_to_save_file", str(e))
+            )
+    
+    def update_text(self):
+        """Update all text elements"""
+        self.title_label.config(text=self.tm.get_message("decrypt_edit_title"))
+        self.file_label.config(text=self.tm.get_message("encrypted_file_label"))
+        self.browse_btn.config(text=self.tm.get_message("browse_button"))
+        self.key_label.config(text=self.tm.get_message("decrypt_key_label"))
+        self.load_btn.config(text=self.tm.get_message("load_decrypt_button"))
+        self.add_btn.config(text=self.tm.get_message("add_sensor_button"))
+        self.edit_btn.config(text=self.tm.get_message("edit_sensor_button"))
+        self.delete_btn.config(text=self.tm.get_message("delete_sensor_button"))
+        self.save_btn.config(text=self.tm.get_message("save_encrypt_button"))
+
+
+class SensorEditDialog:
+    """Dialog for adding/editing sensor credentials"""
+    
+    def __init__(self, parent, tm: TranslationManager, initial_values=None):
+        self.tm = tm
+        self.result = None
+        
+        self.dialog = tk.Toplevel(parent)
+        self.dialog.title(tm.get_message("edit_sensor_title") if initial_values else tm.get_message("add_sensor_title"))
+        self.dialog.geometry("400x200")
+        self.dialog.transient(parent)
+        self.dialog.grab_set()
+        
+        # Variables
+        self.ip_var = tk.StringVar(value=initial_values[0] if initial_values else "")
+        self.username_var = tk.StringVar(value=initial_values[1] if initial_values else "")
+        self.password_var = tk.StringVar(value=initial_values[2] if initial_values else "")
+        
+        self.create_widgets()
+        
+        # Center dialog
+        self.dialog.update_idletasks()
+        x = (self.dialog.winfo_screenwidth() // 2) - (self.dialog.winfo_width() // 2)
+        y = (self.dialog.winfo_screenheight() // 2) - (self.dialog.winfo_height() // 2)
+        self.dialog.geometry(f"+{x}+{y}")
+        
+        self.dialog.wait_window()
+    
+    def create_widgets(self):
+        """Create dialog widgets"""
+        # IP Address
+        ttk.Label(self.dialog, text=self.tm.get_message("ip_address_label")).grid(row=0, column=0, padx=10, pady=10, sticky=tk.W)
+        ttk.Entry(self.dialog, textvariable=self.ip_var, width=30).grid(row=0, column=1, padx=10, pady=10)
+        
+        # Username
+        ttk.Label(self.dialog, text=self.tm.get_message("username_label")).grid(row=1, column=0, padx=10, pady=10, sticky=tk.W)
+        ttk.Entry(self.dialog, textvariable=self.username_var, width=30).grid(row=1, column=1, padx=10, pady=10)
+        
+        # Password
+        ttk.Label(self.dialog, text=self.tm.get_message("password_label")).grid(row=2, column=0, padx=10, pady=10, sticky=tk.W)
+        ttk.Entry(self.dialog, textvariable=self.password_var, width=30, show="*").grid(row=2, column=1, padx=10, pady=10)
+        
+        # Buttons
+        btn_frame = ttk.Frame(self.dialog)
+        btn_frame.grid(row=3, column=0, columnspan=2, pady=20)
+        
+        ttk.Button(btn_frame, text=self.tm.get_message("ok_button"), command=self.on_ok).pack(side=tk.LEFT, padx=5)
+        ttk.Button(btn_frame, text=self.tm.get_message("cancel_button"), command=self.on_cancel).pack(side=tk.LEFT, padx=5)
+    
+    def on_ok(self):
+        """Handle OK button"""
+        ip = self.ip_var.get().strip()
+        username = self.username_var.get().strip()
+        password = self.password_var.get()
+        
+        if not ip or not username or not password:
+            messagebox.showerror(
+                self.tm.get_message("error_title"),
+                self.tm.get_message("all_fields_required")
+            )
+            return
+        
+        self.result = (ip, username, password)
+        self.dialog.destroy()
+    
+    def on_cancel(self):
+        """Handle Cancel button"""
+        self.dialog.destroy()
+
+
 class HealthCheckTabView:
     """Handles the health check tab UI"""
     
@@ -709,11 +1056,13 @@ class SensorGUI:
         
         # Update notebook tabs
         self.notebook.tab(0, text=self.translation_manager.get_message("tab_encrypt"))
-        self.notebook.tab(1, text=self.translation_manager.get_message("tab_health"))
-        self.notebook.tab(2, text=self.translation_manager.get_message("tab_results"))
+        self.notebook.tab(1, text=self.translation_manager.get_message("tab_decrypt"))
+        self.notebook.tab(2, text=self.translation_manager.get_message("tab_health"))
+        self.notebook.tab(3, text=self.translation_manager.get_message("tab_results"))
         
         # Update each tab view
         self.encryption_view.update_text()
+        self.decryption_view.update_text() 
         self.health_check_view.update_text()
         self.results_view.update_text()
     
@@ -724,11 +1073,13 @@ class SensorGUI:
         
         # Create frames for each tab
         encrypt_frame = ttk.Frame(self.notebook)
+        decrypt_frame = ttk.Frame(self.notebook) 
         health_frame = ttk.Frame(self.notebook)
         results_frame = ttk.Frame(self.notebook)
         
         # Create view objects for each tab
         self.encryption_view = EncryptionTabView(encrypt_frame, self.translation_manager)
+        self.decryption_view = DecryptionTabView(decrypt_frame, self.translation_manager) 
         self.health_check_view = HealthCheckTabView(
             health_frame,
             self.translation_manager,
@@ -742,6 +1093,7 @@ class SensorGUI:
         
         # Add tabs to notebook
         self.notebook.add(encrypt_frame, text=self.translation_manager.get_message("tab_encrypt"))
+        self.notebook.add(decrypt_frame, text=self.translation_manager.get_message("tab_decrypt")) 
         self.notebook.add(health_frame, text=self.translation_manager.get_message("tab_health"))
         self.notebook.add(results_frame, text=self.translation_manager.get_message("tab_results"))
 
