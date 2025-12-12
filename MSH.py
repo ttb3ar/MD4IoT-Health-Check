@@ -258,7 +258,7 @@ class DecryptionTabView:
         self.browse_btn.pack(side=tk.LEFT, padx=5)
         
         # Decryption key
-        key_frame = ttk.Frame(load_frame)
+        key_frame = ttk.Frame(self.load_frame)
         key_frame.pack(fill=tk.X, pady=5)
         
         self.key_label = ttk.Label(key_frame, text=self.tm.get_message("decrypt_key_label"))
@@ -267,7 +267,7 @@ class DecryptionTabView:
         ttk.Entry(key_frame, textvariable=self.decrypt_key_var, width=40, show="*").pack(side=tk.LEFT, padx=5)
         
         # Load and Save buttons
-        button_frame = ttk.Frame(load_frame)
+        button_frame = ttk.Frame(self.load_frame)
         button_frame.pack(pady=5)
         
         self.load_btn = ttk.Button(
@@ -317,7 +317,7 @@ class DecryptionTabView:
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         
         # Editor buttons
-        btn_frame = ttk.Frame(editor_frame)
+        btn_frame = ttk.Frame(self.editor_frame)
         btn_frame.pack(fill=tk.X, pady=10)
         
         self.add_btn = ttk.Button(btn_frame, text=self.tm.get_message("add_sensor_button"), command=self.add_sensor)
