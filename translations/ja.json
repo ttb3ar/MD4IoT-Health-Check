@@ -129,6 +129,12 @@
 	    "warning_title": "警告",
 	    "confirm_title": "確認",
 		"username_column": "ユーザー名",
-		"password_column": "パスワード"
+		"password_column": "パスワード",
+
+		"config_button": "設定",
+		"config_editor_title": "設定エディター",
+		"config_editor_description": "タイムアウトとパフォーマンス設定を調整します。値はconfig.jsonに保存されます",
+		"reset_defaults_button": "デフォルトにリセット",
+		"config_saved_successfully": "設定が正常に保存されました！変更は新しいヘルスチェックから有効になります。"
     }
 }
