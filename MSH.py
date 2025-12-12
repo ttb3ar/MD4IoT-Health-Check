@@ -246,7 +246,7 @@ class DecryptionTabView:
         file_frame.pack(fill=tk.X, pady=5)
         
         self.file_label = ttk.Label(file_frame, text=self.tm.get_message("encrypted_file_label"))
-        file_label.pack(side=tk.LEFT)
+        self.file_label.pack(side=tk.LEFT)
         
         ttk.Entry(file_frame, textvariable=self.encrypted_file_var, width=40).pack(side=tk.LEFT, padx=5)
         
