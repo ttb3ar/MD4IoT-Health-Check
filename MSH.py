@@ -266,13 +266,24 @@ class DecryptionTabView:
         
         ttk.Entry(key_frame, textvariable=self.decrypt_key_var, width=40, show="*").pack(side=tk.LEFT, padx=5)
         
-        # Load button
+        # Load and Save buttons
+        button_frame = ttk.Frame(load_frame)
+        button_frame.pack(pady=5)
+        
         self.load_btn = ttk.Button(
-            load_frame,
+            button_frame,
             text=self.tm.get_message("load_decrypt_button"),
             command=self.load_and_decrypt
         )
-        self.load_btn.pack(pady=5)
+        self.load_btn.pack(side=tk.LEFT, padx=5)
+        
+        self.save_btn = ttk.Button(
+            button_frame,
+            text=self.tm.get_message("save_encrypt_button"),
+            command=self.save_and_encrypt,
+            state=tk.DISABLED
+        )
+        self.save_btn.pack(side=tk.LEFT, padx=5)
         
         # Editor section
         editor_frame = ttk.LabelFrame(self.parent, text=self.tm.get_message("sensor_editor_section"), padding=10)
@@ -311,14 +322,6 @@ class DecryptionTabView:
         # Save section
         save_frame = ttk.Frame(self.parent)
         save_frame.pack(fill=tk.X, padx=20, pady=10)
-        
-        self.save_btn = ttk.Button(
-            save_frame,
-            text=self.tm.get_message("save_encrypt_button"),
-            command=self.save_and_encrypt,
-            state=tk.DISABLED
-        )
-        self.save_btn.pack()
     
     def browse_encrypted_file(self):
         """Browse for encrypted file"""
