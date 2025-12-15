@@ -618,8 +618,11 @@ class ConfigEditorDialog:
         ).pack(pady=10, padx=10)
         
         # Scrollable frame for config items
-        canvas = tk.Canvas(self.dialog)
-        scrollbar = ttk.Scrollbar(self.dialog, orient="vertical", command=canvas.yview)
+        canvas_container = ttk.Frame(self.dialog)
+        canvas_container.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        canvas = tk.Canvas(canvas_container)
+        scrollbar = ttk.Scrollbar(canvas_container, orient="vertical", command=canvas.yview)
         scrollable_frame = ttk.Frame(canvas)
         
         scrollable_frame.bind(
@@ -652,10 +655,13 @@ class ConfigEditorDialog:
             
             row += 1
         
-        canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=10, pady=10)
-        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        canvas_container = ttk.Frame(self.dialog)
+        canvas_container.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
         
-        # Buttons
+        canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        # Buttons at bottom
         btn_frame = ttk.Frame(self.dialog)
         btn_frame.pack(fill=tk.X, pady=10, padx=10)
         
@@ -667,14 +673,14 @@ class ConfigEditorDialog:
         
         ttk.Button(
             btn_frame,
-            text=self.tm.get_message("ok_button"),
-            command=self.on_ok
+            text=self.tm.get_message("cancel_button"),
+            command=self.on_cancel
         ).pack(side=tk.RIGHT, padx=5)
         
         ttk.Button(
             btn_frame,
-            text=self.tm.get_message("cancel_button"),
-            command=self.on_cancel
+            text=self.tm.get_message("ok_button"),
+            command=self.on_ok
         ).pack(side=tk.RIGHT, padx=5)
     
     def reset_defaults(self):
