@@ -16,33 +16,25 @@ An application to remotley check the uptime of Microsoft Defender for IoT networ
   
 Credentials should be stored in a .json format such as in the example file  
 Then encrypt using the program before storing the outputted key in a secure location  
-Best to delete the original .json  
+(Best to practice is to delete the original .json and securley save the decryption key)  
   
 ## Setup
 Click on download to get the installer  
   
 Alternativley:  
 Place the application, icon, .enc/.json files, and transaltions folder (contaning files) in the same directory  
-  
-## To run  
-cd to the directory you have the application saved and:
-python MSP.py
+-> cd to the directory you have everything saved in and run build.py  
+(Read build guide.pdf more more details)  
+(as of version 2.0.0 you may need to put in translation files manually)  
 
-*Alternativley:*  
-Would upload the .exe but github has a 25mb upload limit:  
-run:  
-  pip install pyinstaller  
-  
-make sure you have the translation folder, favicon, and .py all in one folder. cd to that folder  
-then do:  
-  
-  pyinstaller --add-data "translations;translations" --onefile --noconsole --icon=favicon.ico --name="MD4IoT SSH Ping Check" MSP3.py  
 
 
 ## To do:
 optimize boot speed   
 enhance logging capabilities (forwarding results to syslog, customizable output, etc.)  
 automatic mode to intergrate with task scheduler  
+ui improvments (settings panel, general overhaul)  
+more robust install/packaging script  
 
 ## Screenshots:  
 ### EN:  
