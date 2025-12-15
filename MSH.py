@@ -1274,6 +1274,7 @@ class SensorGUI:
         """Called when language changes - update all UI text"""
         self.root.title(self.translation_manager.get_message("app_title"))
         self.lang_label.config(text=self.translation_manager.get_message("language_select"))
+        self.config_btn.config(text=self.translation_manager.get_message("config_button"))
         
         # Update notebook tabs
         self.notebook.tab(0, text=self.translation_manager.get_message("tab_encrypt"))
