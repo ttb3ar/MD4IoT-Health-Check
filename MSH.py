@@ -576,18 +576,206 @@ class SensorEditDialog:
         """Handle Cancel button"""
         self.dialog.destroy()
 
+class ConfigEditorDialog:
+    """Dialog for editing configuration settings"""
+    
+    def __init__(self, parent, tm: TranslationManager, config: Config):
+        self.tm = tm
+        self.config = config
+        self.result = False
+        
+        self.dialog = tk.Toplevel(parent)
+        self.dialog.title(tm.get_message("config_editor_title"))
+        self.dialog.geometry("500x600")
+        self.dialog.transient(parent)
+        self.dialog.grab_set()
+        
+        # Store original values for cancel
+        self.original_settings = config.settings.copy()
+        
+        # Variables for each config item
+        self.vars = {}
+        for key in Config.DEFAULTS.keys():
+            self.vars[key] = tk.StringVar(value=str(config.get(key)))
+        
+        self.create_widgets()
+
+        # Register for language changes
+        self.tm.add_language_change_callback(self.update_text)
+
+        # Handle window close button
+        self.dialog.protocol("WM_DELETE_WINDOW", self.on_cancel)
+        
+        # Center dialog
+        self.dialog.update_idletasks()
+        x = (self.dialog.winfo_screenwidth() // 2) - (self.dialog.winfo_width() // 2)
+        y = (self.dialog.winfo_screenheight() // 2) - (self.dialog.winfo_height() // 2)
+        self.dialog.geometry(f"+{x}+{y}")
+        
+        self.dialog.wait_window()
+    
+    def create_widgets(self):
+        """Create dialog widgets"""
+        # Title
+        self.description_label = ttk.Label(
+            self.dialog,
+            text=self.tm.get_message("config_editor_description"),
+            wraplength=450
+        )
+        self.description_label.pack(pady=10, padx=10)
+        
+        # Scrollable frame for config items
+        canvas_container = ttk.Frame(self.dialog)
+        canvas_container.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        canvas = tk.Canvas(canvas_container)
+        scrollbar = ttk.Scrollbar(canvas_container, orient="vertical", command=canvas.yview)
+        scrollable_frame = ttk.Frame(canvas)
+        
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+        
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+        
+        # Config items
+        row = 0
+        for key, default_value in Config.DEFAULTS.items():
+            # Label
+            label_text = key.replace("_", " ").title()
+            ttk.Label(scrollable_frame, text=label_text).grid(
+                row=row, column=0, padx=10, pady=5, sticky=tk.W
+            )
+            
+            # Entry
+            entry = ttk.Entry(scrollable_frame, textvariable=self.vars[key], width=20)
+            entry.grid(row=row, column=1, padx=10, pady=5)
+            
+            # Default value label
+            ttk.Label(
+                scrollable_frame,
+                text=f"(default: {default_value})",
+                foreground="gray"
+            ).grid(row=row, column=2, padx=5, pady=5, sticky=tk.W)
+            
+            row += 1
+        
+        canvas_container = ttk.Frame(self.dialog)
+        canvas_container.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        # Buttons at bottom - store references
+        btn_frame = ttk.Frame(self.dialog)
+        btn_frame.pack(fill=tk.X, pady=10, padx=10)
+        
+        self.reset_btn = ttk.Button(
+            btn_frame,
+            text=self.tm.get_message("reset_defaults_button"),
+            command=self.reset_defaults
+        )
+        self.reset_btn.pack(side=tk.LEFT, padx=5)
+        
+        self.cancel_btn = ttk.Button(  # You already have this one
+            btn_frame,
+            text=self.tm.get_message("cancel_button"),
+            command=self.on_cancel
+        )
+        self.cancel_btn.pack(side=tk.RIGHT, padx=5)
+        
+        self.ok_btn = ttk.Button(
+            btn_frame,
+            text=self.tm.get_message("ok_button"),
+            command=self.on_ok
+        )
+        self.ok_btn.pack(side=tk.RIGHT, padx=5)
+    
+    def reset_defaults(self):
+        """Reset all values to defaults"""
+        for key, default_value in Config.DEFAULTS.items():
+            self.vars[key].set(str(default_value))
+    
+    def on_ok(self):
+        """Handle OK button"""
+        try:
+            # Validate and save all values
+            for key, var in self.vars.items():
+                value_str = var.get().strip()
+                
+                # Try to convert to appropriate type
+                if key == "LOG_FILE":
+                    self.config.set(key, value_str)
+                else:
+                    # Try to parse as number
+                    try:
+                        if '.' in value_str:
+                            value = float(value_str)
+                        else:
+                            value = int(value_str)
+                        self.config.set(key, value)
+                    except ValueError:
+                        messagebox.showerror(
+                            self.tm.get_message("error_title"),
+                            f"Invalid value for {key}: {value_str}"
+                        )
+                        return
+            
+            # Save to file
+            self.config.save_config()
+            self.result = True
+            
+            messagebox.showinfo(
+                self.tm.get_message("success_title"),
+                self.tm.get_message("config_saved_successfully")
+            )
+
+            # Remove callback before destroying
+            try:
+                self.tm.callbacks.remove(self.update_text)
+            except ValueError:
+                pass  # Callback already removed
+            self.dialog.destroy()
+            
+        except Exception as e:
+            messagebox.showerror(
+                self.tm.get_message("error_title"),
+                f"Failed to save config: {str(e)}"
+            )
+    
+    def on_cancel(self):
+        """Handle Cancel button"""
+        # Restore original settings
+        self.config.settings = self.original_settings
+        # Remove callback before destroying
+        try:
+            self.tm.callbacks.remove(self.update_text)
+        except ValueError:
+            pass  # Callback already removed
+        self.dialog.destroy()
+
+    def update_text(self):
+        """Update all text elements (called on language change)"""
+        self.dialog.title(self.tm.get_message("config_editor_title"))
+        self.description_label.config(text=self.tm.get_message("config_editor_description"))
+        self.reset_btn.config(text=self.tm.get_message("reset_defaults_button"))
+        self.ok_btn.config(text=self.tm.get_message("ok_button"))
+        self.cancel_btn.config(text=self.tm.get_message("cancel_button"))
 
 class HealthCheckTabView:
     """Handles the health check tab UI"""
     
-    def __init__(self, parent, translation_manager: TranslationManager, results_manager: ResultsManager):
+    def __init__(self, parent, translation_manager: TranslationManager, results_manager: ResultsManager, config: Config):
         self.parent = parent
         self.tm = translation_manager
         self.results_manager = results_manager
+        self.config = config
         
         self.credential_manager = CredentialManager()
-        self.logger = Logger()
-        self.health_checker = SensorHealthChecker(self.logger)
+        self.logger = Logger(config.LOG_FILE)
+        self.health_checker = SensorHealthChecker(self.logger, config)
         
         # Variables
         self.creds_file_var = tk.StringVar(value="sensor_credentials.enc")
@@ -1004,6 +1192,9 @@ class SensorGUI:
     
     def __init__(self, root):
         self.root = root
+
+        # Initialize config first
+        self.config = Config()
         
         # Initialize managers
         self.translation_manager = TranslationManager()
@@ -1021,7 +1212,7 @@ class SensorGUI:
         self.create_notebook()
     
     def create_language_selection(self):
-        """Create language selection dropdown"""
+        """Create language selection dropdown and config button"""
         lang_frame = ttk.Frame(self.root)
         lang_frame.pack(fill=tk.X, padx=10, pady=5)
         
@@ -1059,6 +1250,18 @@ class SensorGUI:
         
         self.language_dropdown.bind('<<ComboboxSelected>>', self.on_language_dropdown_changed)
         self.language_dropdown.pack(side=tk.LEFT, padx=10)
+
+        # Add Config button
+        self.config_btn = ttk.Button(
+            lang_frame,
+            text=self.translation_manager.get_message("config_button"),
+            command=self.open_config_editor
+        )
+        self.config_btn.pack(side=tk.LEFT, padx=10)
+
+    def open_config_editor(self):
+        """Open configuration editor dialog"""
+        ConfigEditorDialog(self.root, self.translation_manager, self.config)
     
     def on_language_dropdown_changed(self, event=None):
         """Handle language dropdown selection"""
@@ -1071,6 +1274,7 @@ class SensorGUI:
         """Called when language changes - update all UI text"""
         self.root.title(self.translation_manager.get_message("app_title"))
         self.lang_label.config(text=self.translation_manager.get_message("language_select"))
+        self.config_btn.config(text=self.translation_manager.get_message("config_button"))
         
         # Update notebook tabs
         self.notebook.tab(0, text=self.translation_manager.get_message("tab_encrypt"))
@@ -1101,7 +1305,8 @@ class SensorGUI:
         self.health_check_view = HealthCheckTabView(
             health_frame,
             self.translation_manager,
-            self.results_manager
+            self.results_manager,
+            self.config
         )
         self.results_view = ResultsTabView(
             results_frame,
