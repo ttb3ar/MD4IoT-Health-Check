@@ -599,6 +599,12 @@ class ConfigEditorDialog:
             self.vars[key] = tk.StringVar(value=str(config.get(key)))
         
         self.create_widgets()
+
+        # Register for language changes
+        self.tm.add_language_change_callback(self.update_text)
+
+        # Handle window close button
+        self.dialog.protocol("WM_DELETE_WINDOW", self.on_cancel)
         
         # Center dialog
         self.dialog.update_idletasks()
@@ -611,11 +617,12 @@ class ConfigEditorDialog:
     def create_widgets(self):
         """Create dialog widgets"""
         # Title
-        ttk.Label(
+        self.description_label = ttk.Label(
             self.dialog,
             text=self.tm.get_message("config_editor_description"),
             wraplength=450
-        ).pack(pady=10, padx=10)
+        )
+        self.description_label.pack(pady=10, padx=10)
         
         # Scrollable frame for config items
         canvas_container = ttk.Frame(self.dialog)
@@ -661,27 +668,30 @@ class ConfigEditorDialog:
         canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
-        # Buttons at bottom
+        # Buttons at bottom - store references
         btn_frame = ttk.Frame(self.dialog)
         btn_frame.pack(fill=tk.X, pady=10, padx=10)
         
-        ttk.Button(
+        self.reset_btn = ttk.Button(
             btn_frame,
             text=self.tm.get_message("reset_defaults_button"),
             command=self.reset_defaults
-        ).pack(side=tk.LEFT, padx=5)
+        )
+        self.reset_btn.pack(side=tk.LEFT, padx=5)
         
-        ttk.Button(
+        self.cancel_btn = ttk.Button(  # You already have this one
             btn_frame,
             text=self.tm.get_message("cancel_button"),
             command=self.on_cancel
-        ).pack(side=tk.RIGHT, padx=5)
+        )
+        self.cancel_btn.pack(side=tk.RIGHT, padx=5)
         
-        ttk.Button(
+        self.ok_btn = ttk.Button(
             btn_frame,
             text=self.tm.get_message("ok_button"),
             command=self.on_ok
-        ).pack(side=tk.RIGHT, padx=5)
+        )
+        self.ok_btn.pack(side=tk.RIGHT, padx=5)
     
     def reset_defaults(self):
         """Reset all values to defaults"""
@@ -721,7 +731,12 @@ class ConfigEditorDialog:
                 self.tm.get_message("success_title"),
                 self.tm.get_message("config_saved_successfully")
             )
-            
+
+            # Remove callback before destroying
+            try:
+                self.tm.callbacks.remove(self.update_text)
+            except ValueError:
+                pass  # Callback already removed
             self.dialog.destroy()
             
         except Exception as e:
@@ -734,7 +749,20 @@ class ConfigEditorDialog:
         """Handle Cancel button"""
         # Restore original settings
         self.config.settings = self.original_settings
+        # Remove callback before destroying
+        try:
+            self.tm.callbacks.remove(self.update_text)
+        except ValueError:
+            pass  # Callback already removed
         self.dialog.destroy()
+
+    def update_text(self):
+        """Update all text elements (called on language change)"""
+        self.dialog.title(self.tm.get_message("config_editor_title"))
+        self.description_label.config(text=self.tm.get_message("config_editor_description"))
+        self.reset_btn.config(text=self.tm.get_message("reset_defaults_button"))
+        self.ok_btn.config(text=self.tm.get_message("ok_button"))
+        self.cancel_btn.config(text=self.tm.get_message("cancel_button"))
 
 class HealthCheckTabView:
     """Handles the health check tab UI"""
