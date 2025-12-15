@@ -57,4 +57,4 @@ automatic mode to intergrate with task scheduler
 <img width="1920" height="1008" alt="9c5b9b1e-432d-4d2d-8275-8b2365296d39" src="https://github.com/user-attachments/assets/14c96345-526a-4e6f-a4b5-9b2898dbcc4a" />
 <img width="1920" height="1008" alt="26c66f6b-6c52-4c49-be58-eff35ef659cb" src="https://github.com/user-attachments/assets/9e31a127-0042-4573-89b3-0c472da9ac96" />
 <img width="1920" height="1008" alt="385f510e-33c1-4759-ac6a-3d8aa72f7ef1" src="https://github.com/user-attachments/assets/fa54955c-522b-4867-8469-5705b6629370" />
-<img width="752" height="948" alt="7dea476f-427b-44ad-a003-03033081ead9" src="https://github.com/user-attachments/assets/da04af3a-aca2-4d64-8fba-6a3824a4cf74" />
+<img width="752" height="948" alt="c86053fd-4d0e-4680-b488-d827ac82440b" src="https://github.com/user-attachments/assets/4d5ff461-da26-45a0-967a-ff9e97be0c90" />
