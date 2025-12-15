@@ -4,12 +4,14 @@ An application to remotley check the uptime of Microsoft Defender for IoT networ
 **Features:**  
 -encrypt credentials using AES  
 -reads encrypted file and preforms health check   
+-edit encrypted file in decryption editor  
 --pings sensor ip  
 --ssh's into admin account and runs "system sanity"  
 --su into cyberx account and runs "uptime"  
 -supports multiple sensors  
 -supports multiple languages  
 --open source language supprt: just create a .json folder in the format of the existing ones  
+-configure test parameters  
 -log and export results in .csv format  
   
 Credentials should be stored in a .json format such as in the example file  
@@ -44,11 +46,15 @@ automatic mode to intergrate with task scheduler
 
 ## Screenshots:  
 ### EN:  
-<img width="1920" height="1008" alt="691043a7-c954-476b-9f45-457148c52120" src="https://github.com/user-attachments/assets/0755b1a4-8f72-477f-802f-3836f250d974" />
-<img width="1920" height="1008" alt="ebcf7ccd-aadf-4654-b29a-0f6bc1a53522" src="https://github.com/user-attachments/assets/8f25e8ec-e046-45bb-8a36-7ca85c8618ac" />
-<img width="1920" height="1008" alt="4862b87a-5937-4577-b58b-302b1558d694" src="https://github.com/user-attachments/assets/2caffc3c-b65a-49d7-bf8a-5eedaa5fd510" />  
+<img width="1920" height="1008" alt="bd47776e-d582-45f6-b9d4-f6080e1ac3b6" src="https://github.com/user-attachments/assets/f988bfc1-74cd-4596-901b-5e2a8b5af04c" />
+<img width="1920" height="1008" alt="15eecd93-dea3-47a7-ba19-17db52a5f0e0" src="https://github.com/user-attachments/assets/5a608abd-0f7f-4e74-a608-ee222709d1b8" />
+<img width="1920" height="1008" alt="b0a10d62-f9ea-4fe8-a6a1-d8022452cbb2" src="https://github.com/user-attachments/assets/fff1439e-b173-4636-b5a9-c11374fe4887" />
+<img width="752" height="948" alt="c3013bb0-efc1-4556-9af8-004b0808d938" src="https://github.com/user-attachments/assets/2346ed8f-c1a4-423d-88d6-ba02924e05d5" />
+  
   
 ### JP:  
-<img width="1920" height="1008" alt="106278c6-83c5-46e1-a39b-e1cc80cc89ec" src="https://github.com/user-attachments/assets/36072e46-d373-41d7-9224-04fbe8500b0e" />
-<img width="1920" height="1008" alt="ba04a0cf-3f1f-4b94-b3af-08b87aaa579e" src="https://github.com/user-attachments/assets/a20cbd66-7bb5-4844-b71f-02c337fdc10e" />
-<img width="1920" height="1008" alt="49d3d891-4a77-4c87-a52e-42df348e78a0" src="https://github.com/user-attachments/assets/eed0853f-8b3a-4c0b-b7a7-d0e6915dafa9" />
+<img width="1920" height="1008" alt="a00cb46e-808a-4feb-9e23-735130628562" src="https://github.com/user-attachments/assets/5dd86e05-7f7c-44bd-9b4e-395951d248f8" />
+<img width="1920" height="1008" alt="9c5b9b1e-432d-4d2d-8275-8b2365296d39" src="https://github.com/user-attachments/assets/14c96345-526a-4e6f-a4b5-9b2898dbcc4a" />
+<img width="1920" height="1008" alt="26c66f6b-6c52-4c49-be58-eff35ef659cb" src="https://github.com/user-attachments/assets/9e31a127-0042-4573-89b3-0c472da9ac96" />
+<img width="1920" height="1008" alt="385f510e-33c1-4759-ac6a-3d8aa72f7ef1" src="https://github.com/user-attachments/assets/fa54955c-522b-4867-8469-5705b6629370" />
+<img width="752" height="948" alt="7dea476f-427b-44ad-a003-03033081ead9" src="https://github.com/user-attachments/assets/da04af3a-aca2-4d64-8fba-6a3824a4cf74" />
