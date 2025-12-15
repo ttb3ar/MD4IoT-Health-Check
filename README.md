@@ -35,6 +35,7 @@ enhance logging capabilities (forwarding results to syslog, customizable output,
 automatic mode to intergrate with task scheduler  
 ui improvments (settings panel, general overhaul)  
 more robust install/packaging script  
+hero icon  
 
 ## Screenshots:  
 ### EN:  
